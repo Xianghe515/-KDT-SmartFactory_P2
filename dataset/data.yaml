@@ -1,0 +1,13 @@
+train: "C:/Users/PC/Desktop/trainingyolo11/dataset/train/train" # 절대 경로
+labels: "C:/Users/PC/Desktop/trainingyolo11/dataset/train/val" # 절대 경로
+test: "C:/Users/PC/Desktop/trainingyolo11/dataset/test/images" # 상대 경로를 절대 경로로 변경
+
+nc: 2
+names: ["사람", "배달 상자"]
+
+roboflow:
+  workspace: human-walk
+  project: audiencia3-syjij
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/human-walk/audiencia3-syjij/dataset/1
