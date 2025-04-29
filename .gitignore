@@ -132,7 +132,8 @@ venv312/
 ENV/
 env.bak/
 venv.bak/
-datasets/
+datasets
+datasets2
 
 # Spyder project settings
 .spyderproject
