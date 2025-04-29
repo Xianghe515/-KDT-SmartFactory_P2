@@ -1,12 +1,14 @@
 import os
 import cv2
-import torch
 import numpy as np
 from flask import Flask, Response
 from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
 from VideoStream import VideoStream
 from ultralytics import YOLO
+
+import logging
+logging.getLogger('ultralytics').setLevel(logging.WARNING)
 
 # Flask 앱 초기화
 app = Flask(__name__)
@@ -52,7 +54,7 @@ except Exception as e:
 #         font = ImageFont.truetype(font_path, font_size)
 #     except Exception as e:
 #         print(f"폰트 로드 오류: {e}")
-#         return img
+#         return img1
 
 #     img_pil = Image.fromarray(img)
 #     draw = ImageDraw.Draw(img_pil)
@@ -79,12 +81,26 @@ def put_text_korean(img, text, position, font_path=FONT_PATH, font_size=20, colo
         # 오류 발생 시 원본 이미지 반환
         return img
 
+def classify_panel_type(width_px, height_px):
+    aspect_ratio = width_px / height_px
+    if width_px >= 170 and height_px >= 170:
+        return "square"
+    elif height_px >= 200 and width_px < 100:
+        return "long"
+    elif width_px < 70 and height_px < 130:
+        return "small"
+    else:
+        return "unknown"
+
+
 def generate_frames():
+    target_class_indices = [0]  # 필요한 클래스 인덱스만 필터링
+    colors = np.random.uniform(0, 255, size=(len(model.names), 3))
+
     while True:
         frame = stream.get_frame()
         if frame is None:
             continue
-        colors = np.random.uniform(0, 255, size=(len(model.names), 3))
 
         img = frame.copy()
         results = model(img)
@@ -94,7 +110,6 @@ def generate_frames():
         cv2.putText(img, current_time_str, (img.shape[1] - 630, img.shape[0] - 20),
                     cv2.FONT_HERSHEY_DUPLEX, 0.7, (83, 115, 219), 2)
 
-        detected_this_frame = False
         frame_detected_names = set()
 
         for result in results:
@@ -104,13 +119,31 @@ def generate_frames():
                 cls = box.cls[0].item()
                 class_index = int(cls)
 
-                if class_index in target_class_indices and conf >= 0.4:
-                    detected_this_frame = True
+                if class_index in target_class_indices and conf >= 0.75:
                     frame_detected_names.add(model.names[class_index])
                     color = colors[class_index]
+
+                    # 픽셀 단위 크기 계산
+                    width_px = x2 - x1
+                    height_px = y2 - y1
+                    aspect_ratio = width_px / height_px
+
+                    # 모형 분류
+                    panel_type = classify_panel_type(width_px, height_px)
+
+                    # 정보 표시용 텍스트
+                    label = f"{model.names[class_index]} {conf:.2f}"
+                    size_info = f"W: {width_px:.0f}px H: {height_px:.0f}px R: {aspect_ratio:.2f}"
+                    type_info = f"Type: {panel_type}"
+
+                    # 박스와 텍스트 출력
                     cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
-                    cv2.putText(img, f"{model.names[class_index]} {conf:.2f}",
-                                (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 3)
+                    cv2.putText(img, label, (int(x1), int(y1) - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                    cv2.putText(img, size_info, (int(x1), int(y2) + 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                    cv2.putText(img, type_info, (int(x1), int(y2) + 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
         _, buffer = cv2.imencode('.jpg', img)
         frame_bytes = buffer.tobytes()
@@ -118,6 +151,8 @@ def generate_frames():
                b'Content-Type:image/jpeg\r\n'
                b'Content-Length: ' + f"{len(frame_bytes)}".encode() + b'\r\n'
                b'\r\n' + frame_bytes + b'\r\n')
+
+
 
 
 @app.route("/")
