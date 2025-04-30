@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입 - YOLO 기반 불량 검출 시스템</title>
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#3b82f6", secondary: "#64748b" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+      }
+      :where([class^="ri-"])::before {
+        content: "\f3c2";
+      } /* Remix Icon 기본 아이콘 설정 (필요에 따라 변경) */
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div
+      class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+    >
+      <div
+        class="max-w-xl w-full bg-white p-10 rounded-2xl shadow-[0_20px_60px_-10px_rgba(0,0,0,0.1)] relative overflow-hidden"
+      >
+        <div
+          class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-indigo-500 to-purple-500"
+        ></div>
+        <div class="text-center">
+          <h1 class="font-['Pacifico'] text-4xl text-gray-900 mb-3">logo</h1>
+          <h2 class="text-xl font-medium text-gray-700">
+            YOLO 기반 불량 검출 시스템
+          </h2>
+          <p class="mt-3 text-sm text-gray-500">
+            새로운 계정을 생성하여 시스템에 가입하세요
+          </p>
+        </div>
+        <form
+          class="mt-10 space-y-6"
+          id="signupForm"
+          method="POST"
+          action="{{ url_for('auth.register') }}"
+        >
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label
+                for="firstName"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >이름</label
+              >
+              <div class="relative group">
+                <div
+                  class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                >
+                  <i
+                    class="ri-user-line text-gray-400 group-focus-within:text-primary transition-colors"
+                  ></i>
+                </div>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  class="appearance-none block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all duration-200 sm:text-sm"
+                  placeholder="홍"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                for="lastName"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >성</label
+              >
+              <div class="relative group">
+                <div
+                  class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                >
+                  <i
+                    class="ri-user-line text-gray-400 group-focus-within:text-primary transition-colors"
+                  ></i>
+                </div>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  class="appearance-none block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all duration-200 sm:text-sm"
+                  placeholder="길동"
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >이메일</label
+            >
+            <div class="relative group">
+              <div
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+              >
+                <i
+                  class="ri-mail-line text-gray-400 group-focus-within:text-primary transition-colors"
+                ></i>
+              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                class="appearance-none block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all duration-200 sm:text-sm"
+                placeholder="name@company.com"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >비밀번호</label
+            >
+            <div class="relative group">
+              <div
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+              >
+                <i
+                  class="ri-lock-line text-gray-400 group-focus-within:text-primary transition-colors"
+                ></i>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                class="appearance-none block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all duration-200 sm:text-sm"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              for="confirmPassword"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >비밀번호 확인</label
+            >
+            <div class="relative group">
+              <div
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+              >
+                <i
+                  class="ri-lock-line text-gray-400 group-focus-within:text-primary transition-colors"
+                ></i>
+              </div>
+              <input
+                id="confirmPassword"
+                name="password2"
+                type="password"
+                required
+                class="appearance-none block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all duration-200 sm:text-sm"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          <div>
+            <button
+              type="submit"
+              class="w-full flex justify-center items-center py-3 px-4 text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors !rounded-button relative overflow-hidden group"
+            >
+              <span
+                class="absolute inset-0 w-full h-full transition-all duration-300 ease-out transform translate-x-full bg-gradient-to-r from-primary via-indigo-500 to-purple-500 group-hover:translate-x-0"
+              ></span>
+              <span class="relative flex items-center">
+                <i class="ri-user-add-line mr-2"></i>
+                회원가입
+              </span>
+            </button>
+          </div>
+        </form>
+        <div class="mt-8 text-center">
+          <p class="text-sm text-gray-500">
+            이미 계정이 있으신가요?
+            <a
+              href="{{ url_for('auth.login') }}"
+              class="font-medium text-gray-700 hover:text-primary transition-colors"
+              >로그인하기</a
+            >
+          </p>
+        </div>
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div
+          id="signupError"
+          class="mt-4 bg-red-50 text-red-700 p-3 rounded-md text-sm"
+        >
+          <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %} {% endwith %}
+      </div>
+    </div>
+  </body>
+</html>
+

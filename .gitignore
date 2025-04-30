@@ -1,0 +1,56 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyd
+.python-version
+env/
+venv/
+*.egg-info
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.env
+build/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg
+*.whl
+.installed.cfg
+*. Picard
+
+# Editors backups and settings
+.vscode/
+*.swp
+*.swo
+*.swn
+*.un~
+*.an~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Database files
+*.sqlite
+*.db
+
+# Model files (용량이 큰 모델 파일은 제외하는 것이 좋습니다)
+yolov8n.pt

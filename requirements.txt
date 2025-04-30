@@ -1,0 +1,12 @@
+Flask
+Flask-Login
+Flask-SQLAlchemy
+Werkzeug
+python-dotenv
+Flask-Migrate
+opencv-python
+Pillow
+requests
+PyMySQL
+cryptography
+ncnn==1.0.20241226
