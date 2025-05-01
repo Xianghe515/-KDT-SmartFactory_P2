@@ -36,52 +36,12 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
     />
-    <style>
-      :where([class^="ri-"])::before {
-        content: "\f3c2";
-      }
-      body {
-        font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-      }
-      input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-      input[type="number"] {
-        -moz-appearance: textfield;
-      }
-      .business-input:focus {
-        outline: none;
-        transform: translateY(-1px);
-      }
-      .business-input {
-        transition: all 0.2s ease;
-      }
-      .business-input::placeholder {
-        color: #cbd5e1;
-      }
-      @media (min-width: 320px) and (max-width: 767px) {
-        .business-input-container {
-          gap: 8px;
-          padding: 0 16px;
-        }
-      }
-      @media (min-width: 768px) and (max-width: 1023px) {
-        .business-input-container {
-          gap: 12px;
-          max-width: 500px;
-        }
-      }
-      @media (min-width: 1024px) {
-        .business-input-container {
-          gap: 16px;
-          max-width: 600px;
-        }
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
   </head>
-  <body class="bg-gray-50">
+  <body class="bg-gray-50 admin-body">
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
       <div class="w-full max-w-lg">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -235,75 +195,6 @@
         </div>
       </div>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const part1 = document.getElementById("business-part1");
-        const part2 = document.getElementById("business-part2");
-        const part3 = document.getElementById("business-part3");
-        const verifyButton = document.getElementById("verify-button");
-        const errorMessage = document.getElementById("error-message");
-        const loadingMessage = document.getElementById("loading-message");
-        const representativeNameInput = document.getElementById(
-          "representative-name"
-        );
-        const emailInput = document.getElementById("email");
-
-        function validateInputs() {
-          const isValidPart1 = /^\d{3}$/.test(part1.value);
-          const isValidPart2 = /^\d{2}$/.test(part2.value);
-          const isValidPart3 = /^\d{5}$/.test(part3.value);
-          const representativeName = representativeNameInput.value.trim();
-          const email = emailInput.value.trim();
-
-          if (
-            isValidPart1 &&
-            isValidPart2 &&
-            isValidPart3 &&
-            representativeName &&
-            email
-          ) {
-            verifyButton.disabled = false;
-            verifyButton.classList.remove("cursor-not-allowed", "opacity-70");
-          } else {
-            verifyButton.disabled = true;
-            verifyButton.classList.add("cursor-not-allowed", "opacity-70");
-          }
-          errorMessage.classList.add("hidden");
-        }
-
-        part1.addEventListener("input", function () {
-          if (this.value.length >= 3) {
-            this.value = this.value.slice(0, 3);
-            part2.focus();
-          }
-          validateInputs();
-        });
-        part2.addEventListener("input", function () {
-          if (this.value.length >= 2) {
-            this.value = this.value.slice(0, 2);
-            part3.focus();
-          }
-          validateInputs();
-        });
-        part3.addEventListener("input", function () {
-          if (this.value.length > 5) {
-            this.value = this.value.slice(0, 5);
-          }
-          validateInputs();
-        });
-        part2.addEventListener("keydown", function (e) {
-          if (e.key === "Backspace" && this.value.length === 0) {
-            part1.focus();
-          }
-        });
-        part3.addEventListener("keydown", function (e) {
-          if (e.key === "Backspace" && this.value.length === 0) {
-            part2.focus();
-          }
-        });
-        representativeNameInput.addEventListener("input", validateInputs);
-        emailInput.addEventListener("input", validateInputs);
-      });
-    </script>
+    <script src="{{ url_for('static', filename='js/admin_p1.js') }}"></script>
   </body>
 </html>

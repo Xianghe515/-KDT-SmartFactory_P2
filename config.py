@@ -28,5 +28,6 @@ class DevelopmentConfig(Config):
 
 config = {
     "development": DevelopmentConfig,
-    # 다른 환경 매핑...
+    "local":       DevelopmentConfig,   # ← 추가
+    
 }

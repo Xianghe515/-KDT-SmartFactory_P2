@@ -15,7 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 다음 입력칸으로 포커스 이동 (setTimeout으로 focus 보장)
   function moveToNext(idx) {
-    if (idx < segments.length - 1) {
+    if (
+      idx < segments.length - 1 &&
+      segments[idx].el.value.length === segments[idx].len
+    ) {
       setTimeout(() => segments[idx + 1].el.focus(), 0);
     }
   }
@@ -53,7 +56,9 @@ document.addEventListener("DOMContentLoaded", function () {
         pos += len;
       });
       // 모든 분할 후 마지막 칸 포커스
-      segments[segments.length - 1].el.focus();
+      if (segments.length > 0) {
+        segments[segments.length - 1].el.focus();
+      }
       validateInputs();
     }
   }
@@ -77,16 +82,30 @@ document.addEventListener("DOMContentLoaded", function () {
     s.el.addEventListener("keydown", (e) => handleBackspace(e, idx));
   });
 
-  // 전체 칸 채워졌는지 확인 및 버튼 토글
+  // 전체 칸 채워졌는지 확인 및 버튼 활성화/비활성화
   function validateInputs() {
     const allFilled = segments.every(({ el, len }) => el.value.length === len);
     verifyButton.disabled = !allFilled;
-    verifyButton.classList.toggle("bg-primary", allFilled);
-    verifyButton.classList.toggle("text-white", allFilled);
-    verifyButton.classList.toggle("cursor-pointer", allFilled);
-    verifyButton.classList.toggle("bg-gray-200", !allFilled);
-    verifyButton.classList.toggle("text-gray-500", !allFilled);
-    verifyButton.classList.toggle("cursor-not-allowed", !allFilled);
+    // 버튼 활성화/비활성화에 따른 스타일 변경
+    if (allFilled) {
+      verifyButton.classList.remove(
+        "bg-gray-200",
+        "text-gray-500",
+        "cursor-not-allowed"
+      );
+      verifyButton.classList.add("bg-primary", "text-white", "cursor-pointer");
+    } else {
+      verifyButton.classList.remove(
+        "bg-primary",
+        "text-white",
+        "cursor-pointer"
+      );
+      verifyButton.classList.add(
+        "bg-gray-200",
+        "text-gray-500",
+        "cursor-not-allowed"
+      );
+    }
     errorMessage.classList.add("hidden");
   }
 

@@ -5,10 +5,13 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)  # 이름 필드 추가
-    last_name = db.Column(db.String(50), nullable=False)   # 성 필드 추가
-    email = db.Column(db.String(120), unique=True, index=True, nullable=False)  # nullable=False 추가
+    representative_name = db.Column(db.String(50), nullable=False)  # 대표자명 필드 추가
+    business_number = db.Column(db.String(12), unique=True, nullable=False) # 사업자 등록번호 필드 추가 (하이픈 제외 12자리)
+    email = db.Column(db.String(120), unique=True, index=True, nullable=False)
+    company_name = db.Column(db.String(100), nullable=False)  # 사업체명 필드 추가
+    phone_number = db.Column(db.String(20), nullable=False)   # 전화번호 필드 추가
     password_hash = db.Column(db.String(256))
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow) # 가입 날짜 필드 추가
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
