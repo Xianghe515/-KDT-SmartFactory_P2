@@ -14,8 +14,8 @@ from email.header import Header
 # 이메일 인증번호 저장 (임시 - 실제 앱에서는 더 안전한 방식 사용)
 email_verification_codes = {}
 
-# CSV 파일 경로 설정 (실제 경로로 변경해야 함)
-CSV_FILE_PATH = r'C:\Users\PC\Desktop\solaproject\business_info.csv'
+# CSV 파일 경로 설정
+CSV_FILE_PATH = './business_info.csv'
 
 def generate_verification_code(length=12):
     """무작위 숫자 인증번호 생성"""
@@ -119,7 +119,6 @@ def verify_business_info():
         result = send_verification_email(email, verification_code)
 
         if result['statusCode'] == '202':
-            flash('이메일로 인증번호가 발송되었습니다. 확인 후 인증해주세요.', 'info')
             return redirect(url_for('auth.admin_p2', email=email, representative_name=representative_name, business_number=business_number))
         else:
             flash('인증 이메일 발송에 실패했습니다. 다시 시도해주세요.', 'error')

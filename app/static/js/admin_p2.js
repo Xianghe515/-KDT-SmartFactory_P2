@@ -1,4 +1,4 @@
-// email_verification.js
+// admin_p2.js
 // 인증번호(4/4/4) 입력란 자동 포커스, 붙여넣기, 백스페이스 이동, 버튼 활성화
 
 document.addEventListener("DOMContentLoaded", function () {
