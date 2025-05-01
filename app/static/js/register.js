@@ -43,30 +43,41 @@ document.addEventListener("DOMContentLoaded", function () {
     // 모든 유효성 검사를 통과하면 서버로 데이터 전송
     const formData = new FormData(registrationForm); // 폼 데이터 객체 생성
     fetch(registrationForm.action, {
-      // 폼의 action 속성 URL 사용
       method: "POST",
       body: formData,
     })
-      .then((response) => {
-        if (response.ok) {
-          // 서버에서 성공 응답 (상태 코드 2xx)을 보낸 경우
-          window.location.href = loginUrl;
+    .then(async (response) => {
+      const contentType = response.headers.get("Content-Type");
+    
+      if (contentType && contentType.includes("application/json")) {
+        // 만약 나중에 JSON 응답도 일부 쓴다면
+        const data = await response.json();
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
         } else {
-          // 서버에서 오류 응답 (상태 코드 4xx 또는 5xx)을 보낸 경우
-          return response.json(); // 오류 메시지를 JSON 형태로 파싱
+          displayMessage(data.message || "오류가 발생했습니다.");
         }
-      })
-      .then((data) => {
-        if (data && data.message) {
-          displayMessage(data.message); // 서버에서 보낸 오류 메시지 표시
-        } else if (!data) {
-          displayMessage("회원가입에 실패했습니다. 다시 시도해주세요.");
+      } else if (contentType && contentType.includes("text/html")) {
+        // HTML 응답일 경우, 오류 메시지를 HTML에서 추출 (간단 버전)
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const flashMessage = doc.querySelector(".flash-message"); // flash 메시지 렌더링된 DOM 가정
+        if (flashMessage) {
+          displayMessage(flashMessage.textContent.trim());
+        } else {
+          displayMessage("서버 유효성 검사 실패. 입력값을 확인하세요.");
         }
-      })
-      .catch((error) => {
-        console.error("회원가입 요청 오류:", error);
-        displayMessage("회원가입 요청 중 오류가 발생했습니다.");
-      });
+      } else {
+        displayMessage("알 수 없는 응답 형식입니다.");
+      }
+    })
+    .catch((error) => {
+      console.error("회원가입 요청 오류:", error);
+      displayMessage("회원가입 요청 중 오류가 발생했습니다.");
+    });
+    
+    
   }
 
   function displayMessage(message, type = "error") {

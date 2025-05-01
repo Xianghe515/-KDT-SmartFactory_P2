@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f9dcc9417807
+Revision ID: 80a1db52a4b2
 Revises: 
-Create Date: 2025-04-26 13:29:15.138771
+Create Date: 2025-05-01 16:07:02.233484
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f9dcc9417807'
+revision = '80a1db52a4b2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,11 +32,15 @@ def upgrade():
 
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('first_name', sa.String(length=50), nullable=False),
-    sa.Column('last_name', sa.String(length=50), nullable=False),
+    sa.Column('representative_name', sa.String(length=50), nullable=False),
+    sa.Column('business_number', sa.String(length=12), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('company_name', sa.String(length=100), nullable=False),
+    sa.Column('phone_number', sa.String(length=20), nullable=False),
     sa.Column('password_hash', sa.String(length=256), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('registration_date', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('business_number')
     )
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_user_email'), ['email'], unique=True)

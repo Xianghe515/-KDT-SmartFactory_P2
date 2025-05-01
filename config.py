@@ -8,7 +8,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config:
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace('mysql://', 'mysql+pymysql://') if os.environ.get('DATABASE_URL') and 'mysql://' in os.environ.get('DATABASE_URL') else 'sqlite:///site.db'
     # 다른 공통 설정...
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
@@ -20,7 +20,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace('mysql://', 'mysql+pymysql://') if os.environ.get('DATABASE_URL') and 'mysql://' in os.environ.get('DATABASE_URL') else f"sqlite:///{basedir / 'dev.sqlite'}"
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace('mysql://', 'mysql+pymysql://') if os.environ.get('DATABASE_URL') and 'mysql://' in os.environ.get('DATABASE_URL') else f"sqlite:///{basedir / 'dev.sqlite'}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
 

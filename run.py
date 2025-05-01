@@ -3,7 +3,7 @@ from app import create_app
 from config import config
 
 # 1) 기본값을 'development'로
-app_env = os.environ.get('FLASK_ENV') or 'development'
+app_env = 'development'
 app = create_app(config[app_env])
 
 if __name__ == '__main__':

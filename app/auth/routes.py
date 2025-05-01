@@ -160,7 +160,6 @@ def verify_code(email):
 def register_form(email):
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
-
     representative_name = request.args.get('representative_name')
     business_number   = request.args.get('business_number')
 
@@ -169,6 +168,9 @@ def register_form(email):
         phone_number   = request.form.get('phone-number')
         password       = request.form.get('password')
         password2      = request.form.get('password-confirm')
+        
+        # 받는 값 로그에 출력
+        current_app.logger.info(f"company_name: {company_name}, phone_number: {phone_number}, password: {password}, password2: {password2}")
 
         if not company_name or not password or not phone_number or not password2:
             flash('모든 필수 필드를 입력해주세요.', 'error')
@@ -198,7 +200,7 @@ def register_form(email):
             db.session.commit()
             current_app.logger.info(f"[DEBUG] 회원가입 커밋 성공 → user.id={user.id}")
             flash('회원가입이 완료되었습니다. 로그인해 주세요.', 'success')
-            return redirect(url_for('auth.login'), code=302) # 성공 시 302 리다이렉트
+            return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"[ERROR] 회원가입 커밋 실패: {type(e).__name__} – {e}")

@@ -80,7 +80,7 @@ form.register-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px 0; /* 상하 padding 조정 */
+  padding: 0; /* 상하 padding 조정 */
 }
 
 label.register-label {
