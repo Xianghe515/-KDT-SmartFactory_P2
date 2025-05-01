@@ -4,8 +4,8 @@ import numpy as np
 from flask import Flask, Response
 from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
-from VideoStream import VideoStream
 from ultralytics import YOLO
+from VideoStream import VideoStream
 
 import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
@@ -15,13 +15,14 @@ app = Flask(__name__)
 
 
 # 설정
-MODEL_PATH = "./runs/detect/train4/weights/best.pt"  # 모델 경로
+MODEL_PATH = "./runs/detect/train4_custom/weights/best.pt"  # 모델 경로
 # DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CAMERA_URL = "http://192.168.0.198:8000"
 FONT_PATH = "/home/xianghe/TRAININGYOLO11/font/NanumGothic.ttf"
 IMAGE_PATH = "/home/xianghe/TRAININGYOLO11/testImage/snow_test.jpg"
 stream = VideoStream("http://192.168.0.198:8000")
-
+trigger_flag = False  # 전역 상태 플래그
+trigger_counter = 0
 # 모델 로드
 try:
     if not os.path.exists(MODEL_PATH):
@@ -82,76 +83,85 @@ def put_text_korean(img, text, position, font_path=FONT_PATH, font_size=20, colo
         return img
 
 def classify_panel_type(width_px, height_px):
-    aspect_ratio = width_px / height_px
-    if width_px >= 170 and height_px >= 170:
+    aspect_ratio = width_px / height_px if height_px != 0 else 0
+
+    # 약간의 오차를 허용하는 비율 기반 판별
+    if 0.9 <= aspect_ratio <= 1.1:
         return "square"
-    elif height_px >= 200 and width_px < 100:
+    elif aspect_ratio >= 2.5:
         return "long"
-    elif width_px < 70 and height_px < 130:
-        return "small"
+    # elif width_px < 70 and height_px < 130:
+    #     return "small"
     else:
         return "unknown"
 
 
 def generate_frames():
-    target_class_indices = [0]  # 필요한 클래스 인덱스만 필터링
+    global latest_frame, trigger_flag
+
+    target_class_indices = [0]  # 분석 대상 클래스 인덱스
     colors = np.random.uniform(0, 255, size=(len(model.names), 3))
+
+    trigger_counter = 0  # 분석 유지 프레임 수
 
     while True:
         frame = stream.get_frame()
         if frame is None:
             continue
 
+        latest_frame = frame.copy()
         img = frame.copy()
-        results = model(img)
 
-        now = datetime.now()
-        current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-        cv2.putText(img, current_time_str, (img.shape[1] - 630, img.shape[0] - 20),
-                    cv2.FONT_HERSHEY_DUPLEX, 0.7, (83, 115, 219), 2)
+        # 감지 요청 발생 시 trigger_counter 설정
+        if trigger_flag:
+            trigger_counter = 40  # YOLO 분석을 40프레임 동안 유지
+            trigger_flag = False
 
-        frame_detected_names = set()
+        # trigger_counter가 남아있을 동안 YOLO 분석 수행
+        if trigger_counter > 0:
+            results = model(img)
 
-        for result in results:
-            for box in result.boxes:
-                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                conf = box.conf[0].item()
-                cls = box.cls[0].item()
-                class_index = int(cls)
+            now = datetime.now()
+            current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            cv2.putText(img, current_time_str, (img.shape[1] - 630, img.shape[0] - 20),
+                        cv2.FONT_HERSHEY_DUPLEX, 0.7, (83, 115, 219), 2)
 
-                if class_index in target_class_indices and conf >= 0.75:
-                    frame_detected_names.add(model.names[class_index])
-                    color = colors[class_index]
+            for result in results:
+                for box in result.boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    conf = box.conf[0].item()
+                    cls = box.cls[0].item()
+                    class_index = int(cls)
 
-                    # 픽셀 단위 크기 계산
-                    width_px = x2 - x1
-                    height_px = y2 - y1
-                    aspect_ratio = width_px / height_px
+                    if class_index in target_class_indices and conf >= 0.6:
+                        color = colors[class_index]
 
-                    # 모형 분류
-                    panel_type = classify_panel_type(width_px, height_px)
+                        width_px = x2 - x1
+                        height_px = y2 - y1
+                        aspect_ratio = width_px / height_px
+                        panel_type = classify_panel_type(width_px, height_px)
 
-                    # 정보 표시용 텍스트
-                    label = f"{model.names[class_index]} {conf:.2f}"
-                    size_info = f"W: {width_px:.0f}px H: {height_px:.0f}px R: {aspect_ratio:.2f}"
-                    type_info = f"Type: {panel_type}"
+                        label = f"{model.names[class_index]} {conf:.2f}"
+                        size_info = f"W: {width_px:.0f}px H: {height_px:.0f}px R: {aspect_ratio:.2f}"
+                        type_info = f"Type: {panel_type}"
 
-                    # 박스와 텍스트 출력
-                    cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
-                    cv2.putText(img, label, (int(x1), int(y1) - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-                    cv2.putText(img, size_info, (int(x1), int(y2) + 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-                    cv2.putText(img, type_info, (int(x1), int(y2) + 40),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                        cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
+                        cv2.putText(img, label, (int(x1), int(y1) - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                        cv2.putText(img, size_info, (int(x1), int(y2) + 20),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                        cv2.putText(img, type_info, (int(x1), int(y2) + 40),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
+            trigger_counter -= 1  # 프레임 카운터 감소
+
+        # 영상 스트리밍 응답
         _, buffer = cv2.imencode('.jpg', img)
         frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type:image/jpeg\r\n'
                b'Content-Length: ' + f"{len(frame_bytes)}".encode() + b'\r\n'
                b'\r\n' + frame_bytes + b'\r\n')
-
 
 
 
@@ -175,6 +185,13 @@ def detect_image_route():
         # send_file을 사용하면 파일 자체가 없는 경우 404 응답을 쉽게 보낼 수 있지만,
         # 여기서는 내부 처리 오류도 포함하므로 404 또는 500 오류 응답 코드를 사용합니다.
         return Response(error_message, status=500, mimetype="text/plain") # 500 Internal Server Error
+
+@app.route("/trigger")
+def trigger_detection():
+    global trigger_flag
+    trigger_flag = True
+    return "YOLO 분석 트리거됨"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
