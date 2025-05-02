@@ -39,15 +39,12 @@
               action="{{ url_for('auth.register_form', email=email, representative_name=representative_name, business_number=business_number) }}"
               class="register-form"
             >
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-              <div id="messageArea">
-                {% for category, message in messages %}
-                  <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-              </div>
-            {% endif %}
-          {% endwith %}
+            <div id="messageArea">
+              {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+            
             <div class="mb-0">
               <label
                 for="representative-name"

@@ -21,7 +21,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<User {self.email}>'
-
+    
 # 다른 모델 정의 (예: 불량 검출 로그)
 class DetectionLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)

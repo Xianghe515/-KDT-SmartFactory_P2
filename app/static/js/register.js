@@ -6,6 +6,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const confirmPasswordInput = document.getElementById("password-confirm");
   const messageArea = document.getElementById("messageArea"); // messageArea가 있다고 가정
 
+  function displayMessage(message, type = "error") {
+    if (messageArea) {
+      messageArea.innerHTML = `<div class="flash-message mt-0 bg-red-50 text-red-700 p-3 rounded-md text-sm ${type}">${message}</div>`;
+    } else {
+      console.log(message); // messageArea가 없으면 콘솔에 출력
+    }
+  }
+
   if (registrationForm) {
     registrationForm.addEventListener("submit", function (event) {
       event.preventDefault(); // 기본 제출 동작 방지
@@ -36,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (password !== confirmPassword) {
-      displayMessage("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      displayMessage("비밀번호가 일치하지 않습니다.");
       return;
     }
 
@@ -52,7 +60,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (contentType && contentType.includes("application/json")) {
         // 만약 나중에 JSON 응답도 일부 쓴다면
         const data = await response.json();
+        console.log(data)
         if (data.redirect_url) {
+          console.log(data.redirect_url)
           window.location.href = data.redirect_url;
         } else {
           displayMessage(data.message || "오류가 발생했습니다.");
@@ -80,12 +90,5 @@ document.addEventListener("DOMContentLoaded", function () {
     
   }
 
-  function displayMessage(message, type = "error") {
-    if (messageArea) {
-      messageArea.textContent = message;
-      messageArea.className = type; // CSS 스타일링을 위한 클래스 추가 (error, success 등)
-    } else {
-      console.log(message); // messageArea가 없으면 콘솔에 출력
-    }
-  }
+
 });

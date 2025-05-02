@@ -40,6 +40,15 @@
               action="{{ url_for('auth.verify_business_info') }}"
               method="post"
             >
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div id="messageArea">
+                {% for category, message in messages %}
+                  <div class="flash-message mt-0 bg-red-50 text-red-700 p-3 rounded-md text-sm {{ category }}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
               <div class="mb-6">
                 <label
                   for="representative-name"

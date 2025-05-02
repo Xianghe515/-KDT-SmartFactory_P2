@@ -24,7 +24,7 @@ def create_app(config_class):
     # ─── 블루프린트 등록 ───
     from .main import bp as main_bp
     from .auth import bp as auth_bp
-    from .camera.routes import camera_bp
+    from .camera.routes import bp as camera_bp
     from .detection import bp as detection_bp
     from .exporter import bp as exporter_bp
     from .trailer import bp as trailer_bp

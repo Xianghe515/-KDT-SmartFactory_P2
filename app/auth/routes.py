@@ -113,6 +113,10 @@ def verify_business_info():
         flash('모든 필드를 올바른 형식으로 입력해주세요.', 'error')
         return redirect(url_for('auth.admin_p1'))
 
+    if User.query.filter_by(email=email).first():
+        flash('이미 등록된 이메일 주소입니다.', 'error')
+        return redirect(url_for('auth.admin_p1'))
+
     if is_valid_business_info_in_csv(business_number, representative_name):
         verification_code = generate_verification_code()
         email_verification_codes[email] = verification_code
@@ -158,10 +162,13 @@ def verify_code(email):
 
 @bp.route('/register_form/<email>', methods=['GET', 'POST'])
 def register_form(email):
+    print("email : ",email)
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     representative_name = request.args.get('representative_name')
     business_number   = request.args.get('business_number')
+    print(business_number, representative_name)
+    
 
     if request.method == 'POST':
         company_name   = request.form.get('company-name')
@@ -175,15 +182,7 @@ def register_form(email):
         if not company_name or not password or not phone_number or not password2:
             flash('모든 필수 필드를 입력해주세요.', 'error')
             return render_template('register.html', email=email, representative_name=representative_name, business_number=business_number)
-
-        if password != password2:
-            flash('비밀번호가 일치하지 않습니다.', 'password-error')
-            return render_template('register.html', email=email, representative_name=representative_name, business_number=business_number)
-
-        if User.query.filter_by(email=email).first():
-            flash('이미 등록된 이메일 주소입니다.', 'error')
-            return render_template('register.html', email=email, representative_name=representative_name, business_number=business_number)
-
+        
         # 사용자 생성
         user = User(
             representative_name=representative_name,
@@ -199,8 +198,9 @@ def register_form(email):
             db.session.add(user)
             db.session.commit()
             current_app.logger.info(f"[DEBUG] 회원가입 커밋 성공 → user.id={user.id}")
-            flash('회원가입이 완료되었습니다. 로그인해 주세요.', 'success')
-            return redirect(url_for('auth.login'))
+            # flash('회원가입이 완료되었습니다. 로그인해 주세요.', 'success')
+            # print("redirect url : ",url_for('auth.login'))
+            return jsonify({'success': True, 'redirect_url': url_for('auth.login')})
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"[ERROR] 회원가입 커밋 실패: {type(e).__name__} – {e}")
