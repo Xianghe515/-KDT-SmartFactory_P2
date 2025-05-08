@@ -17,3 +17,51 @@
 //     );
 //   }
 // });
+const canvas = new fabric.Canvas('labelCanvas');
+let rect;
+
+// 드래그 박스 만들기
+canvas.on('mouse:down', function(options) {
+    const pointer = canvas.getPointer(options.e);
+    rect = new fabric.Rect({
+        left: pointer.x,
+        top: pointer.y,
+        width: 0,
+        height: 0,
+        fill: 'rgba(255, 0, 0, 0.3)',
+        stroke: 'red',
+        strokeWidth: 1,
+        selectable: false
+    });
+    canvas.add(rect);
+});
+
+canvas.on('mouse:move', function(options) {
+    if (!rect) return;
+    const pointer = canvas.getPointer(options.e);
+    rect.set({ width: pointer.x - rect.left, height: pointer.y - rect.top });
+    canvas.renderAll();
+});
+
+canvas.on('mouse:up', function() {
+    rect.set({ selectable: true });
+    rect = null;
+});
+
+function sendLabel() {
+    const objs = canvas.getObjects();
+    const labelData = objs.map(obj => ({
+        x: obj.left,
+        y: obj.top,
+        width: obj.width * obj.scaleX,
+        height: obj.height * obj.scaleY,
+        class: "bird-drop",  // 실제 UI에서 선택하게 할 수 있음
+    }));
+
+    fetch('/save_label', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(labelData[0])  // 하나만 보내는 예시
+    }).then(res => res.json())
+      .then(data => console.log(data));
+}

@@ -17,7 +17,10 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
-
+    CVAT_HOST = os.environ.get('CVAT_HOST')
+    CVAT_USERNAME = os.environ.get('CVAT_USERNAME')
+    CVAT_PASSWORD = os.environ.get('CVAT_PASSWORD')
+    
 class DevelopmentConfig(Config):
     DEBUG = True
     # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace('mysql://', 'mysql+pymysql://') if os.environ.get('DATABASE_URL') and 'mysql://' in os.environ.get('DATABASE_URL') else f"sqlite:///{basedir / 'dev.sqlite'}"

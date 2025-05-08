@@ -5,6 +5,7 @@ import time
 from ultralytics import YOLO
 import numpy as np
 import os
+import requests
 from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
 from app.camera.VideoStream import VideoStream
@@ -50,6 +51,7 @@ def generate_frames():
     colors = np.random.uniform(0, 255, size=(len(model.names), 3))
 
     trigger_counter = 0  # 분석 유지 프레임 수
+    last_saved_time = 0  # 마지막 저장 시간 (timestamp)
 
     while True:
         frame = stream.get_frame()
@@ -59,12 +61,10 @@ def generate_frames():
         latest_frame = frame.copy()
         img = frame.copy()
 
-        # 감지 요청 발생 시 trigger_counter 설정
         if trigger_flag:
-            trigger_counter = 40  # YOLO 분석을 40프레임 동안 유지
+            trigger_counter = 40
             trigger_flag = False
 
-        # trigger_counter가 남아있을 동안 YOLO 분석 수행
         if trigger_counter > 0:
             results = model(img)
 
@@ -100,15 +100,28 @@ def generate_frames():
                         cv2.putText(img, type_info, (int(x1), int(y2) + 40),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-            trigger_counter -= 1  # 프레임 카운터 감소
+                        # 저장 간격 제한: 5초 (5000ms)
+                        current_timestamp = int(time.time() * 1000)
+                        if current_timestamp - last_saved_time >= 5000:
+                            save_dir = "static/detected"
+                            os.makedirs(save_dir, exist_ok=True)
+                            filename = f"defect_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
+                            save_path = os.path.join(save_dir, filename)
+                            cv2.imwrite(save_path, img)
+                            print(f"[저장됨] {save_path}")
+                            last_saved_time = current_timestamp  # 업데이트
+                            requests.post("http://192.168.0.133:8000/upload_and_create_task")  # 포트는 실제 Flask 서버 기준
 
-        # 영상 스트리밍 응답
+
+            trigger_counter -= 1
+
         _, buffer = cv2.imencode('.jpg', img)
         frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type:image/jpeg\r\n'
                b'Content-Length: ' + f"{len(frame_bytes)}".encode() + b'\r\n'
                b'\r\n' + frame_bytes + b'\r\n')
+
 
 @bp.route('/stream')
 def video_feed():
@@ -120,6 +133,3 @@ def trigger_detection():
     global trigger_flag
     trigger_flag = True
     return "YOLO 분석 트리거됨"
-
-
-
