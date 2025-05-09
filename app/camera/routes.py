@@ -8,16 +8,13 @@ import os
 import requests
 from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
-from app.camera.VideoStream import VideoStream
 
 import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
 
-
 # 설정
-MODEL_PATH = "./runs/detect/train4_custom/weights/best.pt"  # 모델 경로
-stream = VideoStream("http://192.168.0.198:8000")
-trigger_flag = False  # 전역 상태 플래그
+MODEL_PATH = "./runs/detect/train4_custom/weights/best.pt"
+trigger_flag = False
 trigger_counter = 0
 
 # 모델 로드
@@ -25,40 +22,50 @@ try:
     if not os.path.exists(MODEL_PATH):
         raise FileNotFoundError(f"모델 파일을 찾을 수 없습니다: {MODEL_PATH}")
     model = YOLO(MODEL_PATH)
-
     print("모델이 성공적으로 로드되었습니다.")
 except Exception as e:
     print(f"모델 로드 중 오류 발생: {e}")
     exit(1)
 
+# 카메라 자동 탐색
+camera_indexes = []
+max_cameras = 3  # 최대 연결 가능한 카메라 수
+
+for i in range(max_cameras):
+    cap = cv2.VideoCapture(i)
+    if cap.isOpened():
+        print(f"카메라 {i}번 감지됨")
+        camera_indexes.append(i)
+    cap.release()
+
+caps = [cv2.VideoCapture(index) for index in camera_indexes]  # 감지된 카메라 리스트 생성
+
 def classify_panel_type(width_px, height_px):
     aspect_ratio = width_px / height_px if height_px != 0 else 0
 
-    # 약간의 오차를 허용하는 비율 기반 판별
     if 0.9 <= aspect_ratio <= 1.1:
         return "square"
     elif aspect_ratio >= 2.5:
         return "long"
-    # elif width_px < 70 and height_px < 130:
-    #     return "small"
     else:
         return "unknown"
 
-def generate_frames():
-    global latest_frame, trigger_flag
+def generate_frames(camera_id):
+    global trigger_flag
 
-    target_class_indices = [0]  # 분석 대상 클래스 인덱스
+    target_class_indices = [0]
     colors = np.random.uniform(0, 255, size=(len(model.names), 3))
 
-    trigger_counter = 0  # 분석 유지 프레임 수
-    last_saved_time = 0  # 마지막 저장 시간 (timestamp)
+    trigger_counter = 0
+    last_saved_time = 0
+
+    cap = caps[camera_id]  # 해당 카메라 인덱스를 사용
 
     while True:
-        frame = stream.get_frame()
-        if frame is None:
+        ret, frame = cap.read()
+        if not ret:
             continue
 
-        latest_frame = frame.copy()
         img = frame.copy()
 
         if trigger_flag:
@@ -100,18 +107,16 @@ def generate_frames():
                         cv2.putText(img, type_info, (int(x1), int(y2) + 40),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-                        # 저장 간격 제한: 5초 (5000ms)
                         current_timestamp = int(time.time() * 1000)
                         if current_timestamp - last_saved_time >= 5000:
-                            save_dir = "static/detected"
+                            save_dir = f"static/detected/camera_{camera_id}"
                             os.makedirs(save_dir, exist_ok=True)
                             filename = f"defect_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
                             save_path = os.path.join(save_dir, filename)
                             cv2.imwrite(save_path, img)
                             print(f"[저장됨] {save_path}")
-                            last_saved_time = current_timestamp  # 업데이트
-                            requests.post("http://192.168.0.133:8000/upload_and_create_task")  # 포트는 실제 Flask 서버 기준
-
+                            last_saved_time = current_timestamp
+                            requests.post("http://192.168.0.133:8000/upload_and_create_task")
 
             trigger_counter -= 1
 
@@ -122,12 +127,21 @@ def generate_frames():
                b'Content-Length: ' + f"{len(frame_bytes)}".encode() + b'\r\n'
                b'\r\n' + frame_bytes + b'\r\n')
 
+# 동적으로 엔드포인트 생성
+# 동적으로 카메라 스트림 뷰 생성
+for i in range(len(camera_indexes)):
+    def make_view_func(camera_id):
+        def view_func():
+            return Response(generate_frames(camera_id),
+                            mimetype='multipart/x-mixed-replace; boundary=frame')
+        return view_func
 
-@bp.route('/stream')
-def video_feed():
-    return Response(generate_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-    
+    view_func = make_view_func(i)
+    endpoint_name = f'video_feed_{i}'
+    route_path = f'/stream/{i}'
+
+    bp.add_url_rule(route_path, endpoint=endpoint_name, view_func=view_func)
+
 @bp.route("/trigger")
 def trigger_detection():
     global trigger_flag
