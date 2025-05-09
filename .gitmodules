@@ -1,0 +1,3 @@
+[submodule "path/to/makesense"]
+	path = path/to/makesense
+	url = https://github.com/SkalskiP/make-sense.git

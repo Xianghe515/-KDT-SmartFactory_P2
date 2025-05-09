@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YOLO 기반 불량 검출 시스템</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <link rel="stylesheet" href="../../../static/css/style.css" />
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="flex flex-col h-screen">
+      <header class="bg-white shadow-sm py-3 px-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <h1 class="text-xl font-bold text-gray-800">
+              YOLO 기반 불량 검출 시스템
+            </h1>
+            <div class="flex items-center space-x-2 ml-8">
+              <div class="flex items-center">
+                <span class="status-indicator status-active"></span>
+                <span class="text-sm text-gray-600">시스템 활성화</span>
+              </div>
+              <div class="flex items-center space-x-2 ml-8">
+                <div class="flex items-center ml-4">
+                  <span class="status-indicator status-active"></span>
+                  <span class="text-sm text-gray-600">1번 카메라 연결됨</span>
+                </div>
+                <div class="flex items-center ml-4">
+                  <span class="status-indicator status-active"></span>
+                  <span class="text-sm text-gray-600">2번 카메라 연결됨</span>
+                </div>
+                <div class="flex items-center ml-4">
+                  <span class="status-indicator status-active"></span>
+                  <span class="text-sm text-gray-600">3번 카메라 연결됨</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-6">
+            <div class="flex items-center">
+              <span class="text-sm text-gray-600 mr-2">자동 검출</span>
+              <label class="custom-switch">
+                <input type="checkbox" checked />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center space-x-4">
+              <div class="relative flex items-center">
+                <button
+                  id="notificationBtn"
+                  class="bg-white border border-gray-300 text-gray-700 w-10 h-10 !rounded-button flex items-center justify-center relative"
+                >
+                  <i class="ri-notification-3-line"></i>
+                  <span
+                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                    >3</span
+                  >
+                </button>
+                <div
+                  id="notificationDropdown"
+                  class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                >
+                  <div class="p-3 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800">알림</h3>
+                  </div>
+                  <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                    <div class="p-3 border-b border-gray-100 hover:bg-gray-50">
+                      <div class="flex items-center">
+                        <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                        <div class="flex-1">
+                          <p class="text-sm text-gray-800">
+                            심각한 불량이 검출되었습니다 - PCB-A2301
+                          </p>
+                          <p class="text-xs text-gray-500 mt-1">방금 전</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-3 border-b border-gray-100 hover:bg-gray-50">
+                      <div class="flex items-center">
+                        <div
+                          class="w-2 h-2 bg-orange-500 rounded-full mr-2"
+                        ></div>
+                        <div class="flex-1">
+                          <p class="text-sm text-gray-800">
+                            검출 민감도가 변경되었습니다
+                          </p>
+                          <p class="text-xs text-gray-500 mt-1">5분 전</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-3 hover:bg-gray-50">
+                      <div class="flex items-center">
+                        <div
+                          class="w-2 h-2 bg-blue-500 rounded-full mr-2"
+                        ></div>
+                        <div class="flex-1">
+                          <p class="text-sm text-gray-800">
+                            시스템 점검이 예정되어 있습니다
+                          </p>
+                          <p class="text-xs text-gray-500 mt-1">1시간 전</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="p-2 border-t border-gray-200">
+                    <button
+                      class="text-sm text-primary w-full py-1 hover:bg-gray-50 rounded"
+                    >
+                      모든 알림 보기
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="bg-white border border-gray-300 text-gray-700 px-4 py-2 !rounded-button flex items-center whitespace-nowrap ml-4"
+              >
+                <i class="ri-user-line mr-1"></i>
+                관리자
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="flex flex-1 overflow-hidden">
+        <div
+          class="w-[60%] flex flex-col bg-white p-4 border-r border-gray-200"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <h2 class="text-lg font-semibold text-gray-800">
+                실시간 불량 검출
+              </h2>
+              <div
+                class="ml-4 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
+              >
+                <span class="status-indicator status-active mr-1"></span>
+                실시간 모니터링 중
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">카메라:</span>
+                <select
+                  class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
+                  id="cameraSelect"
+                >
+                  <option value="0">카메라 1 (메인)</option>
+                  <option value="1">카메라 2 (측면)</option>
+                  <option value="2">카메라 3 (후면)</option>
+                </select>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">해상도:</span>
+                <select
+                  class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
+                >
+                  <option>1080p</option>
+                  <option>720p</option>
+                  <option>480p</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="relative flex-1 bg-black rounded-lg overflow-hidden">
+            <img
+              src="/camera/stream"
+              alt="실시간 비디오 피드"
+              class="w-full h-full object-cover"
+              id="cameraStream"
+            />
+          </div>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <button
+                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+              >
+                <i class="ri-pause-line text-gray-700 ri-lg"></i>
+              </button>
+              <button
+                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+              >
+                <i class="ri-camera-line text-gray-700 ri-lg"></i>
+              </button>
+              <button
+                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+              >
+                <i class="ri-fullscreen-line text-gray-700 ri-lg"></i>
+              </button>
+            </div>
+            <div class="flex items-center space-x-6 w-1/2">
+              <div class="flex items-center space-x-2 w-full">
+                <span class="text-sm text-gray-600 whitespace-nowrap"
+                  >검출 민감도:</span
+                >
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="75"
+                  class="custom-range flex-1"
+                />
+                <span class="text-sm text-gray-700 ml-2">75%</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">임계값:</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="50"
+                  class="custom-range w-24"
+                />
+                <span class="text-sm text-gray-700 ml-2">50%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="resize-handle" id="resize-handle"></div>
+        <div class="w-[40%] flex flex-col bg-white">
+          <div
+            class="flex items-center justify-between p-4 border-b border-gray-200"
+          >
+            <h2 class="text-lg font-semibold text-gray-800">검사 로그</h2>
+            <div class="flex items-center space-x-3">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="검색"
+                  class="pl-8 pr-3 py-1 border-none bg-gray-100 rounded text-sm"
+                />
+                <i
+                  class="ri-search-line absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                ></i>
+              </div>
+              <div class="flex items-center">
+                <button
+                  class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
+                >
+                  <i class="ri-filter-3-line text-gray-700"></i>
+                </button>
+              </div>
+              <div class="flex items-center">
+                <button
+                  class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
+                >
+                  <i class="ri-download-line text-gray-700"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4 p-3 bg-gray-50">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">날짜:</span>
+              <input
+                type="date"
+                value="2025-04-24"
+                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700"
+              />
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">불량 유형:</span>
+              <select
+                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
+              >
+                <option>전체</option>
+                <option>부품 누락</option>
+                <option>균열</option>
+                <option>납땜 불량</option>
+                <option>위치 오차</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">신뢰도:</span>
+              <select
+                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
+              >
+                <option>전체</option>
+                <option>90% 이상</option>
+                <option>80% 이상</option>
+                <option>70% 이상</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <div class="divide-y divide-gray-100">
+              <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div id="logContainer" class="p-4 space-y-4">
+
+                  <div class="mt-2 flex justify-end">
+                    <button
+                      class="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 !rounded-button whitespace-nowrap"
+                    >
+                      상세보기
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-start">
+                  <div
+                    class="w-20 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0"
+                  >
+                    <img
+                      src="https://readdy.ai/api/search-image?query=close%20up%20of%20electronic%20PCB%20board%20with%20missing%20component%2C%20technical%2C%20detailed%2C%20industrial%20inspection&width=80&height=80&seq=2&orientation=squarish"
+                      alt="불량 이미지"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                      <h3 class="font-medium text-gray-900">부품 누락 검출</h3>
+                      <span
+                        class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full"
+                        >심각</span
+                      >
+                    </div>
+                    <div class="mt-1 text-sm text-gray-600">
+                      <p>시간: 2025-04-24 14:32:45</p>
+                      <p>카메라: 카메라 1 (메인)</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 flex justify-end">
+                  <button
+                    class="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 !rounded-button whitespace-nowrap"
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+              <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start">
+                  <div
+                    class="w-20 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0"
+                  >
+                    <img
+                      src="https://readdy.ai/api/search-image?query=close%20up%20of%20electronic%20PCB%20board%20with%20a%20crack%2C%20technical%2C%20detailed%2C%20industrial%20inspection&width=80&height=80&seq=3&orientation=squarish"
+                      alt="불량 이미지"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                      <h3 class="font-medium text-gray-900">균열 검출</h3>
+                      <span
+                        class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full"
+                        >경고</span
+                      >
+                    </div>
+                    <div class="mt-1 text-sm text-gray-600">
+                      <p>시간: 2025-04-24 14:28:12</p>
+                      <p>카메라: 카메라 2 (측면)</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 flex justify-end">
+                  <button
+                    class="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 !rounded-button whitespace-nowrap"
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+              <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start">
+                  <div
+                    class="w-20 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0"
+                  >
+                    <img
+                      src="https://readdy.ai/api/search-image?query=close%20up%20of%20electronic%20PCB%20board%20with%20poor%20soldering%2C%20technical%2C%20detailed%2C%20industrial%20inspection&width=80&height=80&seq=1&orientation=squarish"
+                      alt="불량 이미지"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                      <h3 class="font-medium text-gray-900">납땜 불량 검출</h3>
+                      <span
+                        class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full"
+                        >주의</span
+                      >
+                    </div>
+                    <div class="mt-1 text-sm text-gray-600">
+                      <p>시간: 2025-04-24 14:25:50</p>
+                      <p>카메라: 카메라 1 (메인)</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 flex justify-end">
+                  <button
+                    class="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 !rounded-button whitespace-nowrap"
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+              <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start">
+                  <div
+                    class="w-20 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0"
+                  >
+                    <img
+                      src="https://readdy.ai/api/search-image?query=electronic%20component%20misplaced%20on%20PCB%20board%2C%20top-down%2C%20technical%2C%20detailed%2C%20industrial%20inspection&width=80&height=80&seq=4&orientation=squarish"
+                      alt="불량 이미지"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                      <h3 class="font-medium text-gray-900">위치 오차 검출</h3>
+                      <span
+                        class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full"
+                        >경고</span
+                      >
+                    </div>
+                    <div class="mt-1 text-sm text-gray-600">
+                      <p>시간: 2025-04-24 14:20:30</p>
+                      <p>카메라: 카메라 3 (후면)</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 flex justify-end">
+                  <button
+                    class="text-xs bg-white border border-gray-300 text-gray-700 px-2 py-1 !rounded-button whitespace-nowrap"
+                  >
+                    상세보기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+  </body>
+</html>

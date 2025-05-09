@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}회원가입{% endblock %}
+{% block content %}
+  <body class="bg-gray-50 register-body">
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+      <div class="w-full max-w-lg">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div
+            class="relative bg-gradient-to-r from-primary/10 to-secondary/10 p-8"
+          >
+            <div
+              class="absolute top-0 left-0 w-full h-full bg-[url('https://readdy.ai/api/search-image?query=abstract%2520minimal%2520geometric%2520pattern%2520with%2520soft%2520blue%2520and%2520white%2520colors%2C%2520modern%2520design%2C%2520subtle%2520texture&width=800&height=400&seq=1&orientation=landscape')] bg-cover bg-center opacity-30"
+            ></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-0">
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center"
+                  >
+                    <i class="ri-user-add-line text-xl text-primary"></i>
+                  </div>
+                  <h1 class="text-2xl font-bold text-gray-900">회원가입</h1>
+                </div>
+                <div
+                  class="flex items-center space-x-1 text-sm font-medium text-primary/80"
+                >
+                  <i class="ri-time-line"></i>
+                  <span>Step 3/3</span>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-0">
+                가입에 필요한 정보를 입력해 주세요.
+              </p>
+            </div>
+          </div>
+          <div class="p-8">
+            <form
+              method="POST"
+              action="{{ url_for('auth.register_form', email=email, representative_name=representative_name, business_number=business_number) }}"
+              class="register-form"
+            >
+            <div id="messageArea">
+              {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+            
+            <div class="mb-0">
+              <label
+                for="representative-name"
+                class="block text-sm font-medium text-gray-700 mb-0"
+                >대표자명</label
+              >
+              <input
+                type="text"
+                id="representative-name"
+                class="w-full h-12 px-4 text-lg font-medium bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed register-input"
+                value="{{ representative_name }}"
+                readonly
+                aria-label="대표자명 (수정 불가)"
+              />
+            </div>
+            <div class="mb-0">
+              <label
+                for="business-number"
+                class="block text-sm font-medium text-gray-700 mb-0"
+                >사업자 등록번호</label
+              >
+              <input
+                type="text"
+                id="business-number"
+                class="w-full h-12 px-4 text-lg font-medium bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed register-input"
+                value="{{ business_number }}"
+                readonly
+                aria-label="사업자 등록번호 (수정 불가)"
+              />
+            </div>
+            <div class="mb-0">
+              <label
+                for="email"
+                class="block text-sm font-medium text-gray-700 mb-0"
+                >이메일</label
+              >
+              <input
+                type="email"
+                id="email"
+                class="w-full h-12 px-4 text-lg font-medium bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed register-input"
+                value="{{ email }}"
+                readonly
+                aria-label="이메일 (수정 불가)"
+              />
+            </div>
+              <div class="mb-0">
+                <label
+                  for="company-name"
+                  class="block text-sm font-medium text-gray-700 mb-0"
+                  >사업체명</label
+                >
+                <input
+                  type="text"
+                  id="company-name"
+                  name="company-name"
+                  class="w-full h-12 px-4 text-lg font-medium bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary/30 register-input"
+                  placeholder="사업체명을 입력해 주세요"
+                  aria-label="사업체명"
+                  required
+                />
+              </div>
+              <div class="mb-0">
+                <label
+                  for="phone-number"
+                  class="block text-sm font-medium text-gray-700 mb-0"
+                  >전화번호</label
+                >
+                <input
+                  type="tel"
+                  id="phone-number"
+                  name="phone-number"
+                  class="w-full h-12 px-4 text-lg font-medium bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary/30 register-input"
+                  placeholder="전화번호를 입력해 주세요"
+                  aria-label="전화번호"
+                  required
+                />
+              </div>
+              <div class="mb-0">
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-700 mb-0"
+                  >비밀번호</label
+                >
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="w-full h-12 px-4 text-lg font-medium bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary/30 register-input"
+                  placeholder="비밀번호를 입력해 주세요"
+                  aria-label="비밀번호"
+                  required
+                />
+              </div>
+              <div class="mb-0">
+                <label
+                  for="password-confirm"
+                  class="block text-sm font-medium text-gray-700 mb-0"
+                  >비밀번호 확인</label
+                >
+                <input
+                  type="password"
+                  id="password-confirm"
+                  name="password-confirm"
+                  class="w-full h-12 px-4 text-lg font-medium bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary/30 register-input"
+                  placeholder="비밀번호를 다시 입력해 주세요"
+                  aria-label="비밀번호 확인"
+                  required
+                />
+              </div>
+              <button
+                id="verify-button"
+                type="submit"
+                class="group w-full h-12 bg-primary text-white font-medium rounded-lg transition-all duration-300 ease-in-out hover:bg-primary/90"
+              >
+                <span class="flex items-center justify-center space-x-2">
+                  <span>가입</span>
+                  <i
+                    class="ri-arrow-right-line opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-2 transition-all duration-300"
+                  ></i>
+                </span>
+              </button>
+              
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/register.js') }}"></script>
+  </body>
+{% endblock %}
