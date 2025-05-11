@@ -1,5 +1,8 @@
-from flask import render_template
+from flask import render_template, jsonify
+import os
+import datetime
 from . import bp  # app.detection 패키지 내에서 bp 임포트
+
 
 @bp.route('/api/logs')
 def get_logs():
