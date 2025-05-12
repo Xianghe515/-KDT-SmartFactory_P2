@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YOLO 기반 불량 검출 시스템</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -174,7 +175,6 @@
           </div>
           <div class="relative flex-1 bg-black rounded-lg overflow-hidden">
             <img
-              src="/camera/stream"
               alt="실시간 비디오 피드"
               class="w-full h-full object-cover"
               id="cameraStream"
@@ -295,8 +295,19 @@
           <div class="flex-1 overflow-y-auto custom-scrollbar">
             <div class="divide-y divide-gray-100">
               <div class="p-4 hover:bg-gray-50 transition-colors">
-                <div id="logContainer" class="p-4 space-y-4"></div>
+                
+                <div id="logContainer" class="space-y-4"></div>
             </div>
+          </div>
+        </div>
+        <div id="annotationModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div class="bg-white rounded-lg w-[70%] h-[70%] overflow-hidden relative">
+            <button onclick="closeModal()" class="absolute top-2 right-2  px-3 py-1 rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+              </svg>
+            </button>
+            <iframe id="annotationIframe" src="" class="w-full h-full border-0"></iframe>
           </div>
         </div>
       </main>

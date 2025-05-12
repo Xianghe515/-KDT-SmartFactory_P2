@@ -1,13 +1,17 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, stream_with_context
+from PIL import ImageFont, ImageDraw, Image
+from datetime import datetime
+from ultralytics import YOLO
 from . import bp
 import cv2
 import time
-from ultralytics import YOLO
 import numpy as np
 import os
 import requests
-from PIL import ImageFont, ImageDraw, Image
-from datetime import datetime
+from app.models import DetectionLog
+from app import socketio
+from app import Log_Utils
+from app import db
 
 import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
@@ -109,18 +113,56 @@ def generate_frames(camera_id):
 
                         current_timestamp = int(time.time() * 1000)
                         if current_timestamp - last_saved_time >= 5000 and detected_classes:
-                            save_dir = f"static/detected/camera_{camera_id}"
+                            save_dir = f"app/static/detected"
                             os.makedirs(save_dir, exist_ok=True)
 
                             class_str = '_'.join(sorted(detected_classes))
-                            filename = f"defect_{class_str}_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
+                            filename = f"Camera {camera_id}_{class_str}_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
                             save_path = os.path.join(save_dir, filename)
-                            
+
+                            # 이미지 저장
                             cv2.imwrite(save_path, img)
                             print(f"[저장됨] {save_path}")
                             last_saved_time = current_timestamp
 
+                            # 웹에서 접근 가능한 경로 생성 (예: static/detected/xxx.jpg)
+                            image_path_for_web = f"static/detected/{filename}"
+
+                            # 로그 저장
+                            for result in results:
+                                for box in result.boxes:
+                                    conf = box.conf[0].item()
+                                    cls = int(box.cls[0].item())
+                                    if cls in target_class_indices and conf >= 0.6:
+                                        log = DetectionLog(
+                                            timestamp=now,
+                                            camera_id=camera_id,
+                                            defect_type=model.names[cls],
+                                            confidence=conf,
+                                            image_path=image_path_for_web  # 웹 경로 저장
+                                        )
+                                        db.session.add(log)
+                            
+                            # WebSocket - 실시간 로그 출력
+                            issue_type = Log_Utils.extract_issue_type(filename)
+                            severity, severity_color = Log_Utils.map_severity(issue_type)
+                            camera_name = filename.split('_')[0]
+                            created_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                            log = {
+                                'filename': filename,
+                                'timestamp': created_time,
+                                'imageUrl': f'/static/detected/{filename}',
+                                'issueType': issue_type,
+                                'severity': severity,
+                                'severityColor': severity_color,
+                                'cameraName': camera_name
+                            }
+
+                            socketio.emit('new_log', log)
+                            db.session.commit()
                             detected_classes.clear()
+
 
             trigger_counter -= 1
 
@@ -136,7 +178,7 @@ def generate_frames(camera_id):
 for i in range(len(camera_indexes)):
     def make_view_func(camera_id):
         def view_func():
-            return Response(generate_frames(camera_id),
+            return Response(stream_with_context(generate_frames(camera_id)),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
         return view_func
 

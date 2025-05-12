@@ -131,7 +131,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-app/static/detected/*.jpg
+detected/
 
 # Spyder project settings
 .spyderproject
