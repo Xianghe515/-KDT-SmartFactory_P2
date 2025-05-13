@@ -12,17 +12,6 @@ def get_logs():
     # 클라이언트 기준 IP/호스트 이름 가져오기
     host = request.host.split(':')[0]
 
-    # --- TODO: 실제 Flask 앱의 포트를 여기에 설정하세요 ---
-    # Flask 앱이 실행되는 포트 (개발 환경: 5000, 배포 환경에 따라 달라질 수 있습니다)
-    flask_port = 5000 # <-- 이 값을 실제 Flask 앱 포트로 변경하세요
-    # ----------------------------------------------------
-
-    # --- TODO: Makesense 앱이 실행되는 포트를 여기에 설정하세요 ---
-    # Makesense가 서비스되는 포트 (우리가 수정한 makesense index.tsx가 로드되는 곳)
-    makesense_port = 3000 # <-- 이 값을 실제 Makesense 포트로 변경하세요
-    # ------------------------------------------------------
-
-
     for filename in sorted(os.listdir(log_dir), reverse=True):
         # 이미지 파일만 처리
         if filename.endswith(('.jpg', '.png', '.jpeg')):
@@ -41,10 +30,10 @@ def get_logs():
 
             # --- 수정된 부분: Makesense로 넘길 이미지의 전체 URL 생성 ---
             # Flask 앱의 IP/호스트, 포트, 정적 파일 경로를 조합하여 전체 URL 만듦
-            image_full_url = f'http://{host}:{flask_port}{image_static_path}'
+            image_full_url = f'http://{host}:5000{image_static_path}'
 
             # Makesense의 annotationUrl에 이미지의 전체 URL을 파라미터로 넘김
-            annotation_url = f'http://{host}:{makesense_port}/?image_url={image_full_url}'
+            annotation_url = f'http://{host}:3000/?image_url={image_full_url}'
             # --------------------------------------------------------
 
             logs.append({

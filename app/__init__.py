@@ -26,7 +26,7 @@ def create_app(config_class):
     login_manager.init_app(app)
     socketio.init_app(app)
     
-    CORS(app, origins="http://192.168.0.133:3000")  
+    CORS(app, origins="*") 
     
     # ─── 블루프린트 등록 ───
     from .main import bp as main_bp

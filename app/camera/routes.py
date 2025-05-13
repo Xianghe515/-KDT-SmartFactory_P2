@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, stream_with_context
+from flask import Blueprint, Response, stream_with_context, request, url_for
 from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
 from ultralytics import YOLO
@@ -56,6 +56,7 @@ def classify_panel_type(width_px, height_px):
 
 def generate_frames(camera_id):
     global trigger_flag
+    host = request.host.split(':')[0]
     detected_classes = set()
 
     target_class_indices = [0]
@@ -148,6 +149,9 @@ def generate_frames(camera_id):
                             severity, severity_color = Log_Utils.map_severity(issue_type)
                             camera_name = filename.split('_')[0]
                             created_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            image_static_path = url_for('static', filename=f'detected/{filename}')
+                            image_full_url = f'http://{host}:5000{image_static_path}'
+                            annotation_url = f'http://{host}:3000/?image_url={image_full_url}'
 
                             log = {
                                 'filename': filename,
@@ -156,7 +160,8 @@ def generate_frames(camera_id):
                                 'issueType': issue_type,
                                 'severity': severity,
                                 'severityColor': severity_color,
-                                'cameraName': camera_name
+                                'cameraName': camera_name,
+                                'annotationUrl': annotation_url
                             }
 
                             socketio.emit('new_log', log)
