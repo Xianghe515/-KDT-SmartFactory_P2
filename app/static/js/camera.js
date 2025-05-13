@@ -1,22 +1,74 @@
 document.addEventListener("DOMContentLoaded", () => {
   const cameraSelect = document.getElementById("cameraSelect");
   const cameraStream = document.getElementById("cameraStream");
+  let currentCameraId = cameraSelect.value; // 현재 선택된 카메라 ID 저장
 
   if (cameraSelect && cameraStream) {
     cameraSelect.addEventListener("change", function () {
       const selectedCameraId = this.value;
-      cameraStream.src = `/camera/stream/${selectedCameraId}`;
+      if (selectedCameraId !== currentCameraId) {
+        console.log(`카메라 변경: ${currentCameraId} -> ${selectedCameraId}`);
+        cameraStream.src = `/camera/stream/${selectedCameraId}`;
+        currentCameraId = selectedCameraId;
+      }
     });
 
-    // 페이지 로드시 초기 카메라 스트림 설정 (첫 번째 옵션 값 사용)
-    const initialCameraId = cameraSelect.value;
-    cameraStream.src = `/camera/stream/${initialCameraId}`;
+    // 페이지 로드시 초기 카메라 스트림 설정
+    cameraStream.src = `/camera/stream/${currentCameraId}`;
   } else {
     console.error(
       "cameraSelect 또는 cameraStream 엘리먼트를 찾을 수 없습니다."
     );
   }
+
+  // 카메라 상태 업데이트 함수
+  function updateCameraStatusUI(status) {
+    console.log("카메라 상태 업데이트:", status); // 받은 상태 정보 로깅
+    for (const cameraId in status) {
+      const isConnected = status[cameraId];
+      const statusElement = document.getElementById(`camera${cameraId}Status`);
+      const textElement = document.getElementById(`camera${cameraId}Text`);
+      if (statusElement && textElement) {
+        statusElement.dataset.status = isConnected ? "active" : "deactivate";
+        textElement.textContent = `${cameraId}번 카메라 ${
+          isConnected ? "연결됨" : "연결 끊김"
+        }`;
+
+        if (!isConnected) {
+          console.log(`${cameraId}번 카메라 연결 끊김 감지`); // 연결 끊김 감지 로깅
+          cameraStream.src = ""; // 스트림 해제
+          reconnectCamera(cameraId); // 재연결 시도
+        }
+      }
+    }
+  }
+
+  // 카메라 상태를 주기적으로 확인하는 함수
+  function fetchCameraStatus() {
+    fetch("/camera/api/camera_status") // URL 프리픽스 적용
+      .then((response) => response.json())
+      .then((data) => {
+        updateCameraStatusUI(data);
+      })
+      .catch((error) => {
+        console.error("카메라 상태를 가져오는 데 실패했습니다:", error);
+      });
+  }
+
+  // 카메라 재연결 함수
+  function reconnectCamera(cameraId) {
+    const cameraStream = document.getElementById("cameraStream");
+    cameraStream.src = `/camera/stream/${cameraId}`; // 카메라 재연결
+    console.log(
+      `${cameraId}번 카메라 재연결 시도 URL: /camera/stream/${cameraId}`
+    );
+  }
+
+  // 페이지 로딩 후 초기 상태를 한번 가져오고, 주기적으로 상태 업데이트
+  fetchCameraStatus();
+  setInterval(fetchCameraStatus, 5000); // 5초마다 상태 업데이트
 });
+
 const canvas = new fabric.Canvas("labelCanvas");
 let rect;
 
