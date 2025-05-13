@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_socketio import SocketIO
+from flask_cors import CORS # CORS 임포트 추가
 
 # ─── 확장(Extension) 객체 생성 ───
 db = SQLAlchemy()
@@ -11,6 +12,7 @@ migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 socketio = SocketIO()
+
 
 def create_app(config_class):
     # ─── Flask 애플리케이션 생성 ───
@@ -23,6 +25,8 @@ def create_app(config_class):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     socketio.init_app(app)
+    
+    CORS(app, origins="http://192.168.0.133:3000")  
     
     # ─── 블루프린트 등록 ───
     from .main import bp as main_bp
