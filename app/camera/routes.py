@@ -13,6 +13,7 @@ from app import socketio
 from app import Log_Utils
 from app import db
 
+
 import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
 
@@ -20,6 +21,8 @@ logging.getLogger('ultralytics').setLevel(logging.WARNING)
 MODEL_PATH = "./runs/detect/train4_custom/weights/best.pt"
 trigger_flag = False
 trigger_counter = 0
+current_sensitivity = 0.6
+
 
 # 모델 로드
 try:
@@ -53,7 +56,18 @@ def classify_panel_type(width_px, height_px):
         return "long"
     else:
         return "unknown"
+    
+@socketio.on('connect')
+def handle_connect():
+    print('클라이언트가 WebSocket으로 연결되었습니다.')
 
+@socketio.on('sensitivity')
+def handle_sensitivity(data):
+    global current_sensitivity
+    sensitivity = float(data.get('value', 0.6))
+    current_sensitivity = sensitivity
+    socketio.emit('sensitivity_updated', {'value': current_sensitivity})
+    
 def generate_frames(camera_id):
     global trigger_flag
     host = request.host.split(':')[0]
@@ -92,7 +106,7 @@ def generate_frames(camera_id):
                     conf = box.conf[0].item()
                     cls = box.cls[0].item()
                     class_index = int(cls)
-                    if class_index in target_class_indices and conf >= 0.6:
+                    if class_index in target_class_indices and conf >= current_sensitivity:
                         detected_classes.add(model.names[class_index])
                         color = colors[class_index]
                         width_px = x2 - x1
@@ -134,7 +148,7 @@ def generate_frames(camera_id):
                                 for box in result.boxes:
                                     conf = box.conf[0].item()
                                     cls = int(box.cls[0].item())
-                                    if cls in target_class_indices and conf >= 0.6:
+                                    if cls in target_class_indices and conf >= current_sensitivity:
                                         log = DetectionLog(
                                             timestamp=now,
                                             camera_id=camera_id,
@@ -167,7 +181,6 @@ def generate_frames(camera_id):
                             socketio.emit('new_log', log)
                             db.session.commit()
                             detected_classes.clear()
-
 
             trigger_counter -= 1
 

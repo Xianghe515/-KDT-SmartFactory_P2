@@ -20,19 +20,39 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeWebSocket();
 });
 
+// ✅ 전역 변수로 선언하여 재사용
+let socket;
 function initializeWebSocket() {
-  // 'io' 객체는 SocketIO 클라이언트 라이브러리에서 제공됩니다.
-  // HTML 파일에 <script src="/static/socket.io.min.js"></script> 와 같이 포함되어야 합니다.
-  const socket = io.connect('http://' + document.domain + ':' + location.port);
+  // 소켓이 이미 연결되었는지 확인
+  if (!socket) {
+    socket = io.connect('http://' + document.domain + ':' + location.port);
+    console.log('클라이언트가 WebSocket으로 연결되었습니다.')
 
-  // 새로운 로그를 수신
-  socket.on('new_log', function (data) {
-    displayLog(data);
-  });
+    // 새로운 로그 수신
+    socket.on('new_log', function (data) {
+      displayLog(data);
+    });
+
+    // 민감도 업데이트 로그
+    socket.on('sensitivity_updated', function (data) {
+      console.log('검출 민감도 수정:', data.value);
+    });
+  }
 
   // 기존 로그 로드
   loadLogs();
 }
+
+function updateSensitivity(value) {
+  if (!socket) return; // 소켓이 아직 연결되지 않은 경우 예외 처리
+
+  const floatVal = parseFloat(value) / 100;  // 0.0 ~ 1.0 범위로 변환
+  socket.emit('sensitivity', { value: floatVal });
+
+  // 👇 HTML 조작은 별도로 이벤트 핸들러에 등록하세요 (초기화 시점에)
+  document.getElementById('sensitivityValue').innerText = value + '%';
+}
+
 
 async function loadLogs() {
   try {
@@ -72,7 +92,6 @@ function displayLog(log) {
   console.log("Processing log:", log);
   console.log("Annotation URL for this log:", log.annotationUrl);
   // ----------------------------------------------
-
 
   // 로그 항목 내용 생성
   logItem.innerHTML = `
