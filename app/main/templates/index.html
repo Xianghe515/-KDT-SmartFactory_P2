@@ -142,12 +142,7 @@
               <h2 class="text-lg font-semibold text-gray-800">
                 실시간 불량 검출
               </h2>
-              <div
-                class="ml-4 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
-              >
-                <span class="status-indicator status-active mr-1"></span>
-                실시간 모니터링 중
-              </div>
+              
             </div>
             <div class="flex items-center space-x-3">
               <div class="flex items-center space-x-2">
@@ -161,16 +156,7 @@
                   <option value="2">카메라 3 (후면)</option>
                 </select>
               </div>
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-600">해상도:</span>
-                <select
-                  class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
-                >
-                  <option>1080p</option>
-                  <option>720p</option>
-                  <option>480p</option>
-                </select>
-              </div>
+              
             </div>
           </div>
           <div class="relative flex-1 bg-black rounded-lg overflow-hidden">
@@ -193,6 +179,7 @@
                 <i class="ri-camera-line text-gray-700 ri-lg"></i>
               </button>
               <button
+                id="fullscreen-btn"
                 class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
               >
                 <i class="ri-fullscreen-line text-gray-700 ri-lg"></i>
@@ -235,13 +222,7 @@
                   class="ri-search-line absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
                 ></i>
               </div>
-              <div class="flex items-center">
-                <button
-                  class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
-                >
-                  <i class="ri-filter-3-line text-gray-700"></i>
-                </button>
-              </div>
+              
               <div class="flex items-center">
                 <button
                   class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
@@ -273,7 +254,7 @@
               </select>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-600">신뢰도:</span>
+              <span class="text-sm text-gray-600">검출 민감도:</span>
               <select
                 class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
               >
@@ -281,6 +262,7 @@
                 <option>90% 이상</option>
                 <option>80% 이상</option>
                 <option>70% 이상</option>
+                <option>70% 미만</option>
               </select>
             </div>
           </div>

@@ -53,7 +53,6 @@ function updateSensitivity(value) {
   document.getElementById('sensitivityValue').innerText = value + '%';
 }
 
-
 async function loadLogs() {
   try {
     const res = await fetch('/detection/api/logs');
@@ -77,6 +76,20 @@ async function loadLogs() {
     alert('로그 로드 중 네트워크 오류가 발생했습니다. 나중에 다시 시도해주세요.');
   }
 }
+
+// 전체 화면
+document.getElementById("fullscreen-btn").addEventListener("click", function () {
+    let videoFrame = document.getElementById("cameraStream");
+    if (videoFrame.requestFullscreen) {
+        videoFrame.requestFullscreen();
+    } else if (videoFrame.mozRequestFullScreen) { // Firefox
+        videoFrame.mozRequestFullScreen();
+    } else if (videoFrame.webkitRequestFullscreen) { // Chrome, Safari, Opera
+        videoFrame.webkitRequestFullscreen();
+    } else if (videoFrame.msRequestFullscreen) { // IE/Edge
+        videoFrame.msRequestFullscreen();
+    }
+});
 
 function displayLog(log) {
   const container = document.getElementById('logContainer');
@@ -134,7 +147,6 @@ function displayLog(log) {
       });
   }
   // -------------------------------------------------
-
 }
 
 // openModal 함수는 인자로 받은 URL 값을 로그로 출력하여 확인합니다.

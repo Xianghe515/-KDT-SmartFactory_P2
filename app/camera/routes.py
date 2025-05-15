@@ -1,5 +1,4 @@
 from flask import Blueprint, Response, stream_with_context, request, url_for
-from PIL import ImageFont, ImageDraw, Image
 from datetime import datetime
 from ultralytics import YOLO
 from . import bp
@@ -18,7 +17,7 @@ import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
 
 # 설정
-MODEL_PATH = "./runs/detect/train4_custom/weights/best.pt"
+MODEL_PATH = "./runs/detect/train5_new/weights/best.pt"
 trigger_flag = False
 trigger_counter = 0
 current_sensitivity = 0.6
@@ -73,7 +72,7 @@ def generate_frames(camera_id):
     host = request.host.split(':')[0]
     detected_classes = set()
 
-    target_class_indices = [0]
+    target_class_indices = [0, 1, 2, 3, 4]
     colors = np.random.uniform(0, 255, size=(len(model.names), 3))
 
     trigger_counter = 0
