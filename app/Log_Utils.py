@@ -5,9 +5,9 @@ def extract_issue_type(filename):
         return 'Unknown'
     
 def map_severity(issue_type):
-    if issue_type in ['electrical-damage', 'physical-damage']:
+    if issue_type in ['Physical-damage']:
         return ('높음', 'red')
-    elif issue_type in ['bird-drop', 'dusty']:
+    elif issue_type in ['Snow', 'Dirty', 'Defective']:
         return ('중간', 'yellow')
     else:
         return ('낮음', 'green')

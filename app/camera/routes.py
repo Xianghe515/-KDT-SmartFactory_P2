@@ -174,7 +174,8 @@ def generate_frames(camera_id):
                                 'severity': severity,
                                 'severityColor': severity_color,
                                 'cameraName': camera_name,
-                                'annotationUrl': annotation_url
+                                'annotationUrl': annotation_url,
+                                'confidence': conf,
                             }
 
                             socketio.emit('new_log', log)
