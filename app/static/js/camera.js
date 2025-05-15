@@ -150,7 +150,7 @@ function displayLog(log) {
      </div>
   `;
 
-  container.appendChild(logItem);
+  container.insertBefore(logItem, container.firstChild); // 로그가 위에서부터 출력되도록
 
   // --- 버튼 엘리먼트를 찾아서 이벤트 리스너를 추가 ---
   const annotationButton = logItem.querySelector('.annotation-button');

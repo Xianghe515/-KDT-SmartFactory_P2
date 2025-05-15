@@ -127,20 +127,25 @@ def generate_frames(camera_id):
 
                         current_timestamp = int(time.time() * 1000)
                         if current_timestamp - last_saved_time >= 5000 and detected_classes:
-                            save_dir = f"app/static/detected"
+                            save_dir = "app/static/detected"        # 분석된 이미지
+                            original_dir = "app/static/original"    # 원본 이미지
                             os.makedirs(save_dir, exist_ok=True)
-
+                            os.makedirs(original_dir, exist_ok=True)
+                            
+                            # 파일명 생성
                             class_str = '_'.join(sorted(detected_classes))
                             filename = f"Camera {camera_id}_{class_str}_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
                             save_path = os.path.join(save_dir, filename)
-
+                            original_path = os.path.join(original_dir, filename)
+                            
                             # 이미지 저장
                             cv2.imwrite(save_path, img)
-                            print(f"[저장됨] {save_path}")
+                            cv2.imwrite(original_path, frame)
                             last_saved_time = current_timestamp
 
                             # 웹에서 접근 가능한 경로 생성 (예: static/detected/xxx.jpg)
                             image_path_for_web = f"static/detected/{filename}"
+                            original_path_for_web = f"static/original/{filename}"
 
                             # 로그 저장
                             for result in results:
@@ -162,9 +167,10 @@ def generate_frames(camera_id):
                             severity, severity_color = Log_Utils.map_severity(issue_type)
                             camera_name = filename.split('_')[0]
                             created_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                            image_static_path = url_for('static', filename=f'detected/{filename}')
-                            image_full_url = f'http://{host}:5000{image_static_path}'
-                            annotation_url = f'http://{host}:3000/?image_url={image_full_url}'
+                            download_path = url_for('static', filename=f'detected/{filename}')
+                            original_path = url_for('static', filename=f'original/{filename}')
+                            original_url = f'http://{host}:5000{original_path}'
+                            annotation_url = f'http://{host}:3000/?image_url={original_url}'
 
                             log = {
                                 'filename': filename,

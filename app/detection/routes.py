@@ -24,16 +24,17 @@ def get_logs():
         confidence = log.confidence
         
         # Flask static 파일에 대한 경로 생성
-        image_static_path = url_for('static', filename=f'detected/{filename}')
-
+        download_path = url_for('static', filename=f'detected/{filename}')
+        original_path = url_for('static', filename=f'original/{filename}')
+        
         # 전체 이미지 URL (makesense 연동용)
-        image_full_url = f'http://{host}:5000{image_static_path}'
-        annotation_url = f'http://{host}:3000/?image_url={image_full_url}'
+        original_url = f'http://{host}:5000{original_path}'
+        annotation_url = f'http://{host}:3000/?image_url={original_url}'
 
         logs.append({
             'filename': filename,
             'timestamp': created_time,
-            'imageUrl': image_static_path,
+            'imageUrl': download_path,
             'issueType': issue_type,
             'severity': severity,
             'severityColor': severity_color,
