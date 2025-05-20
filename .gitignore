@@ -133,6 +133,7 @@ env.bak/
 venv.bak/
 detected/
 original/
+makesense/
 
 # Spyder project settings
 .spyderproject
