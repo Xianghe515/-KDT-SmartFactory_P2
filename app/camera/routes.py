@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, stream_with_context, request, url_for
+from flask import Blueprint, Response, stream_with_context, request, url_for, jsonify
 from datetime import datetime
 from ultralytics import YOLO
 from . import bp
@@ -21,7 +21,7 @@ MODEL_PATH = "./runs/detect/train5_new/weights/best.pt"
 trigger_flag = False
 trigger_counter = 0
 current_sensitivity = 0.6
-
+latest_frames = {}
 
 # 모델 로드
 try:
@@ -86,7 +86,8 @@ def generate_frames(camera_id):
             continue
 
         img = frame.copy()
-
+        latest_frames[camera_id] = frame.copy()  # 🔸 최신 프레임 저장
+        
         if trigger_flag:
             trigger_counter = 40
             trigger_flag = False
@@ -217,3 +218,72 @@ def trigger_detection():
     global trigger_flag
     trigger_flag = True
     return "YOLO 분석 트리거됨"
+
+@bp.route("/capture/<int:camera_id>", methods=["POST"])
+def capture_frame(camera_id):
+    host = request.host.split(':')[0]
+    frame = latest_frames.get(camera_id)
+    if frame is None:
+        return jsonify({"success": False, "message": "No frame available"}), 404
+
+    now = datetime.now()
+    save_dir = "app/static/detected"
+    original_dir = "app/static/original"
+    class_str = "Captured"
+    filename = f"Camera {camera_id}_{class_str}_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
+    save_path = os.path.join(save_dir, filename)
+    original_path = os.path.join(original_dir, filename)
+    os.makedirs(save_dir, exist_ok=True)
+
+    cv2.imwrite(save_path, frame)
+    cv2.imwrite(original_path, frame)
+    image_path_for_web = f"static/detected/{filename}"
+
+    # 로그 DB 저장
+    log = DetectionLog(
+        timestamp=now,
+        camera_id=camera_id,
+        defect_type="Captured",
+        confidence=None,
+        image_path=image_path_for_web
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    # WebSocket - 실시간 로그 출력
+    issue_type = Log_Utils.extract_issue_type(filename)
+    severity, severity_color = Log_Utils.map_severity(issue_type)
+    camera_name = filename.split('_')[0]
+    created_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    download_path = url_for('static', filename=f'detected/{filename}')
+    download_url = f'http://{host}:5000{download_path}'
+    annotation_url = f'http://{host}:3000/?image_url={download_url}'
+
+    # WebSocket 브로드캐스트
+    socketio.emit('new_log', {
+        'filename': filename,
+        'timestamp': created_time,
+        'imageUrl': download_path,
+        'issueType': issue_type,
+        'severity': severity,
+        'severityColor': severity_color,
+        'cameraName': camera_name,
+        'annotationUrl': annotation_url,
+        'confidence': '알 수 없음'
+    })
+
+    return jsonify({
+        "success": True,
+        "filename": filename,
+        "log": {
+            'filename': filename,
+            'timestamp': created_time,
+            'imageUrl': download_path,
+            'issueType': issue_type,
+            'severity': severity,
+            'severityColor': severity_color,
+            'cameraName': camera_name,
+            'annotationUrl': annotation_url,
+            'confidence': '알 수 없음'
+        }
+    })

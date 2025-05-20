@@ -93,6 +93,20 @@ async function loadLogs() {
   }
 }
 
+// 캡처
+document.getElementById('capture-btn').addEventListener('click', () => {
+  const cameraId = document.getElementById('cameraSelect').value;
+  fetch(`/camera/capture/${cameraId}`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        console.log('캡처 완료:', data.filename);
+      } else {
+        console.error('캡처 실패:', data.message);
+      }
+    });
+});
+
 // 전체 화면
 document.getElementById("fullscreen-btn").addEventListener("click", function () {
     let videoFrame = document.getElementById("cameraStream");
