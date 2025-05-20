@@ -1,235 +1,231 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SUNsor</title>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
-    <link rel="stylesheet" href="../../../static/css/style.css" />
-  </head>
-  <body class="bg-gray-50 min-h-screen">
-    <div class="flex flex-col h-screen">
-      <header class="bg-white shadow-sm py-3 px-6">
-        <div class="flex items-center justify-between">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUNsor</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+  <link rel="stylesheet" href="../../../static/css/style.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="flex flex-col h-screen">
+    <header class="bg-white shadow-sm py-3 px-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-4xl font-bold text-gray-800">
+            SUNsor
+          </h1>
+          <div class="flex items-center space-x-2 ml-8">
+            <div class="flex items-center" id="systemStatus">
+              <span class="status-indicator" data-status="active"></span>
+              <span class="text-sm text-gray-600">시스템 활성화</span>
+            </div>
+            <div class="flex items-center space-x-2 ml-8" id="cameraStatuses">
+                <div class="flex items-center ml-4" data-camera-index="0">
+                    <span id="status-0" class="status-indicator" data-status="active"></span>
+                    <span id="connection-status-0" class="text-sm text-gray-600">카메라 1 연결됨</span>
+                </div>
+                <div class="flex items-center ml-4" data-camera-index="1">
+                    <span id="status-1" class="status-indicator" data-status="active"></span>
+                    <span id="connection-status-1" class="text-sm text-gray-600">카메라 2 연결됨</span>
+                </div>
+                <div class="flex items-center ml-4" data-camera-index="2">
+                    <span id="status-2" class="status-indicator" data-status="active"></span>
+                    <span id="connection-status-2" class="text-sm text-gray-600">카메라 3 연결됨</span>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center">
+            <span class="text-sm text-gray-600 mr-2">자동 검출</span>
+            <label class="custom-switch">
+              <input type="checkbox" checked />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
           <div class="flex items-center space-x-4">
-            <h1 class="text-4xl font-bold text-gray-800">
-              SUNsor
-            </h1>
-            <div class="flex items-center space-x-2 ml-8">
-              <div class="flex items-center">
-                <span class="status-indicator status-active"></span>
-                <span class="text-sm text-gray-600">시스템 활성화</span>
-              </div>
-              <div class="flex items-center space-x-2 ml-8">
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">1번 카메라 연결됨</span>
-                </div>
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">2번 카메라 연결됨</span>
-                </div>
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">3번 카메라 연결됨</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center space-x-6">
-            <div class="flex items-center">
-              <span class="text-sm text-gray-600 mr-2">자동 검출</span>
-              <label class="custom-switch">
-                <input type="checkbox" checked />
-                <span class="switch-slider"></span>
-              </label>
-            </div>
-            <div class="flex items-center space-x-4">
-              <button
-                class="bg-white border border-gray-300 text-gray-700 px-4 py-2 !rounded-button flex items-center whitespace-nowrap ml-4"
-              >
-                <i class="ri-user-line mr-1"></i>
-                관리자
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-      <main class="flex flex-1 overflow-hidden">
-        <div
-          class="w-[60%] flex flex-col bg-white p-4 border-r border-gray-200"
-        >
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <h2 class="text-lg font-semibold text-gray-800">
-                실시간 불량 검출
-              </h2>
-            </div>
-            <div class="flex items-center space-x-3">
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-600">카메라:</span>
-                <select
-                  class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
-                  id="cameraSelect"
-                >
-                  <option value="0">카메라 1 (메인)</option>
-                  <option value="1">카메라 2 (측면)</option>
-                  <option value="2">카메라 3 (후면)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="relative flex-1 bg-black rounded-lg overflow-hidden">
-            <img
-              alt="실시간 비디오 피드"
-              class="w-full h-full object-cover"
-              id="cameraStream"
-            />
-          </div>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-              <button
-                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
-              >
-                <i class="ri-pause-line text-gray-700 ri-lg"></i>
-              </button>
-              <button
-                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
-              >
-                <i class="ri-camera-line text-gray-700 ri-lg"></i>
-              </button>
-              <button
-                id="fullscreen-btn"
-                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
-              >
-                <i class="ri-fullscreen-line text-gray-700 ri-lg"></i>
-              </button>
-            </div>
-            <div class="flex items-center space-x-6 w-1/2">
-              <div class="flex items-center space-x-2 w-full">
-                <span class="text-sm text-gray-600 whitespace-nowrap">검출 민감도</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value="60"
-                  class="custom-range flex-1"
-                  oninput="updateSensitivity(this.value)"
-                />
-                <span class="text-sm text-gray-700 ml-2" id="sensitivityValue">60%</span>
-              </div>
-            </div>
-            </div>
-              <div class="flex items-center space-x-6 w-1/2"></div>
-              <div class="flex items-center space-x-2 w-full"></div>
-        </div>
-      <div class="resize-handle" id="resize-handle"></div>
-        <div class="w-[40%] flex flex-col bg-white">
-          <div
-            class="flex items-center justify-between p-4 border-b border-gray-200"
-          >
-            <h2 class="text-lg font-semibold text-gray-800">검사 로그</h2>
-            <div class="flex items-center space-x-3">
-              <div class="relative">
-                <input
-                  id="searchInput"
-                  type="text"
-                  placeholder="검색"
-                  class="pl-8 pr-3 py-1 border-none bg-gray-100 rounded text-sm"
-                />
-                <i
-                  class="ri-search-line absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                ></i>
-              </div>
-              <div class="flex items-center">
-                <button
-                  class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
-                >
-                  <i class="ri-download-line text-gray-700"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4 p-3 bg-gray-50">
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-600">날짜:</span>
-              <input
-                id="dateInput"
-                type="date"
-                value=""
-                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700"
-              />
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-600">불량 유형:</span>
-              <select
-                id="typeSelect"
-                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
-              >
-                <option>전체</option>
-                <option>Defective</option>
-                <option>Physical Damage</option>
-                <option>Dirty</option>
-                <option>Snow</option>
-              </select>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-600">신뢰도:</span>
-              <select
-                id="confidenceSelect"
-                class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
-              >
-                <option>전체</option>
-                <option>90% 이상</option>
-                <option>80% 이상</option>
-                <option>70% 이상</option>
-                <option>70% 미만</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <div class="p-4 divide-y divide-gray-100" style="padding:0">
-                <div id="logContainer"></div>
-            </div>
-          </div>
-        </div>
-        <!-- 어노테이션 모달 -->
-        <div id="annotationModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div class="bg-white rounded-lg w-[80%] h-[80%] min-w-[900px] min-h-[500px] overflow-hidden relative">
-            <button onclick="closeModal()" class="absolute top-1.5 right-3.5 bg-zinc-600 px-3 py-1 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-              </svg>
-            </button>
-            <iframe id="annotationIframe" src="" class="w-full h-full border-0"></iframe>
-          </div>
-        </div>
-        <!-- 이미지 모달 -->
-        <div id="imageModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div class="relative overflow-auto">
-            <img id="modalImage" src="" alt="확대 이미지" class="rounded shadow-lg" style="width:100vh"/>
-            <button onclick="closeImageModal()" class="absolute top-1.5 right-3.5 bg-zinc-600 px-3 py-1 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-              </svg>
+            <button
+              class="bg-white border border-gray-300 text-gray-700 px-4 py-2 !rounded-button flex items-center whitespace-nowrap ml-4"
+            >
+              <i class="ri-user-line mr-1"></i>
+              관리자
             </button>
           </div>
         </div>
       </div>
-      </main>
-    </div>
-    <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
-  </body>
+    </header>
+    <main class="flex flex-1 overflow-hidden">
+      <div
+        class="w-[60%] flex flex-col bg-white p-4 border-r border-gray-200"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <h2 class="text-lg font-semibold text-gray-800">
+              실시간 불량 검출
+            </h2>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">카메라:</span>
+              <select
+                class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
+                id="cameraSelect"
+              >
+                <option value="0">카메라 1 (메인)</option>
+                <option value="1">카메라 2 (측면)</option>
+                <option value="2">카메라 3 (후면)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="relative flex-1 bg-black rounded-lg overflow-hidden">
+          <img
+            alt="실시간 비디오 피드"
+            class="w-full h-full object-cover"
+            id="cameraStream"
+            src="/stream/0"
+          />
+        </div>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button
+              class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+            >
+              <i class="ri-pause-line text-gray-700 ri-lg"></i>
+            </button>
+            <button
+              class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+            >
+              <i class="ri-camera-line text-gray-700 ri-lg"></i>
+            </button>
+            <button
+              id="fullscreen-btn"
+              class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full"
+            >
+              <i class="ri-fullscreen-line text-gray-700 ri-lg"></i>
+            </button>
+          </div>
+          <div class="flex items-center space-x-6 w-1/2">
+            <div class="flex items-center space-x-2 w-full">
+              <span class="text-sm text-gray-600 whitespace-nowrap">검출 민감도</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="60"
+                class="custom-range flex-1"
+                oninput="updateSensitivity(this.value)"
+              />
+              <span class="text-sm text-gray-700 ml-2" id="sensitivityValue">60%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="resize-handle" id="resize-handle"></div>
+      <div class="w-[40%] flex flex-col bg-white">
+        <div
+          class="flex items-center justify-between p-4 border-b border-gray-200"
+        >
+          <h2 class="text-lg font-semibold text-gray-800">검사 로그</h2>
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="검색"
+                class="pl-8 pr-3 py-1 border-none bg-gray-100 rounded text-sm"
+              />
+              <i
+                class="ri-search-line absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+            </div>
+            <div class="flex items-center">
+              <button
+                class="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full"
+              >
+                <i class="ri-download-line text-gray-700"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4 p-3 bg-gray-50">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-600">날짜:</span>
+            <input
+              id="dateInput"
+              type="date"
+              value=""
+              class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700"
+            />
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-600">불량 유형:</span>
+            <select
+              id="typeSelect"
+              class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
+            >
+              <option>전체</option>
+              <option>Defective</option>
+              <option>Physical Damage</option>
+              <option>Dirty</option>
+              <option>Snow</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-600">신뢰도:</span>
+            <select
+              id="confidenceSelect"
+              class="border-none bg-white rounded px-2 py-1 text-sm text-gray-700 pr-8"
+            >
+              <option>전체</option>
+              <option>90% 이상</option>
+              <option>80% 이상</option>
+              <option>70% 이상</option>
+              <option>70% 미만</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+          <div class="p-4 divide-y divide-gray-100" style="padding:0">
+            <div id="logContainer"></div>
+          </div>
+        </div>
+      </div>
+      <div id="annotationModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg w-[80%] h-[80%] min-w-[900px] min-h-[500px] overflow-hidden relative">
+          <button onclick="closeModal()" class="absolute top-1.5 right-3.5 bg-zinc-600 px-3 py-1 rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+          </button>
+          <iframe id="annotationIframe" src="" class="w-full h-full border-0"></iframe>
+        </div>
+      </div>
+      <div id="imageModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="relative overflow-auto">
+          <img id="modalImage" src="" alt="확대 이미지" class="rounded shadow-lg" style="width:100vh"/>
+          <button onclick="closeImageModal()" class="absolute top-1.5 right-3.5 bg-zinc-600 px-3 py-1 rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+</body>
 </html>
