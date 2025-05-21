@@ -8,6 +8,7 @@ import numpy as np
 import os
 import requests
 from app.models import DetectionLog
+from app.VideoStream import VideoStream
 from app import socketio
 from app import Log_Utils
 from app import db
@@ -33,18 +34,17 @@ except Exception as e:
     print(f"모델 로드 중 오류 발생: {e}")
     exit(1)
 
-# 카메라 자동 탐색
-camera_indexes = []
-max_cameras = 3  # 최대 연결 가능한 카메라 수
+# 카메라 감지와 VideoStream 생성 병합
+streams = {}
+max_cameras = 3
 
 for i in range(max_cameras):
-    cap = cv2.VideoCapture(i)
-    if cap.isOpened():
+    try:
+        stream = VideoStream(i)
         print(f"카메라 {i}번 감지됨")
-        camera_indexes.append(i)
-    cap.release()
-
-caps = [cv2.VideoCapture(index) for index in camera_indexes]  # 감지된 카메라 리스트 생성
+        streams[i] = stream
+    except ValueError as e:
+        print(f"카메라 {i}번 감지 실패: {e}")
 
 def classify_panel_type(width_px, height_px):
     aspect_ratio = width_px / height_px if height_px != 0 else 0
@@ -78,11 +78,11 @@ def generate_frames(camera_id):
     trigger_counter = 0
     last_saved_time = 0
 
-    cap = caps[camera_id]  # 해당 카메라 인덱스를 사용
+    stream = streams[camera_id]  # 해당 카메라 인덱스를 사용
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
+        frame = stream.get_frame()
+        if frame is None:
             continue
 
         img = frame.copy()
@@ -198,20 +198,20 @@ def generate_frames(camera_id):
                b'Content-Length: ' + f"{len(frame_bytes)}".encode() + b'\r\n'
                b'\r\n' + frame_bytes + b'\r\n')
 
-# 동적으로 엔드포인트 생성
 # 동적으로 카메라 스트림 뷰 생성
-for i in range(len(camera_indexes)):
+for camera_id in streams.keys():  # 감지된 카메라 인덱스만 사용
     def make_view_func(camera_id):
         def view_func():
             return Response(stream_with_context(generate_frames(camera_id)),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
         return view_func
 
-    view_func = make_view_func(i)
-    endpoint_name = f'video_feed_{i}'
-    route_path = f'/stream/{i}'
+    view_func = make_view_func(camera_id)
+    endpoint_name = f'video_feed_{camera_id}'
+    route_path = f'/stream/{camera_id}'
 
     bp.add_url_rule(route_path, endpoint=endpoint_name, view_func=view_func)
+
 
 @bp.route("/trigger")
 def trigger_detection():
