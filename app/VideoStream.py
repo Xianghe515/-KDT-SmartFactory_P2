@@ -1,32 +1,47 @@
+import cv2
 from threading import Thread
-import cv2 as cv
+import time
 
 
 class VideoStream:
     def __init__(self, stream_url):
-        self.cap = cv.VideoCapture(stream_url, cv.CAP_DSHOW)  # Windows 환경 오류 줄이기
+        self.stream_url = stream_url
+        self.cap = cv2.VideoCapture(self.stream_url)
         if not self.cap.isOpened():
-            raise ValueError(f"[오류] 스트림 {stream_url} 열기 실패")
+            raise ValueError(f"[SYSTEM] 스트림 {stream_url} 열기 실패")
         self.frame = None
         self.running = True
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
 
     def update(self):
-        """ 스트림에서 계속 프레임을 읽어 최신 상태 유지 """
+        fail_count = 0
+        max_fails = 10
         while self.running:
+            if not self.cap or not self.cap.isOpened():
+                self.cap = cv2.VideoCapture(self.stream_url)
+                time.sleep(1)
+                continue
+
+            start = time.time()
             ret, frame = self.cap.read()
-            if ret:
+            elapsed = time.time() - start
+            
+            if ret and frame is not None:
                 self.frame = frame
+                fail_count = 0
             else:
-                print(f"[경고] 스트림 {self.cap}에서 프레임을 읽을 수 없습니다.")
+                fail_count += 1
+                if fail_count >= max_fails or elapsed > 1.0:
+                    self.cap.release()
+                    self.cap = None
+                time.sleep(0.1)
 
     def get_frame(self):
-        """ 최신 프레임 반환 """
         return self.frame
 
     def stop(self):
-        """ 스트림 중지 """
         self.running = False
         self.thread.join()
-        self.cap.release()
+        if self.cap:
+            self.cap.release()
