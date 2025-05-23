@@ -7,12 +7,12 @@ import time
 import numpy as np
 import os
 import requests
+import threading
 from app.models import DetectionLog
 from app.VideoStream import VideoStream
 from app import socketio
 from app import Log_Utils
 from app import db
-
 
 import logging
 logging.getLogger('ultralytics').setLevel(logging.WARNING)
@@ -34,10 +34,11 @@ except Exception as e:
     print(f"모델 로드 중 오류 발생: {e}")
     exit(1)
 
-# 카메라 감지와 VideoStream 생성 병합
-streams = {}
+# 고정된 카메라 인덱스 수
 max_cameras = 3
+streams = {}
 
+# 카메라 감지 및 VideoStream 객체 생성 (감지 실패해도 자리 유지)
 for i in range(max_cameras):
     try:
         stream = VideoStream(i)
@@ -45,6 +46,20 @@ for i in range(max_cameras):
         streams[i] = stream
     except ValueError as e:
         print(f"카메라 {i}번 감지 실패: {e}")
+        streams[i] = None  # 연결 안 된 카메라도 자리 확보
+
+# 상태 브로드캐스트 함수
+def broadcast_camera_status():
+    while True:
+        status = {}
+        for cam_id in range(max_cameras):
+            stream = streams.get(cam_id)
+            status[str(cam_id)] = stream.is_connected() if stream else False
+        socketio.emit('camera_status_update', status)
+        socketio.sleep(3)  # 3초마다 상태 전송
+
+# 서버 시작 시 상태 브로드캐스트 스레드 시작
+threading.Thread(target=broadcast_camera_status, daemon=True).start()
 
 def classify_panel_type(width_px, height_px):
     aspect_ratio = width_px / height_px if height_px != 0 else 0
@@ -287,3 +302,12 @@ def capture_frame(camera_id):
             'confidence': '알 수 없음'
         }
     })
+    
+# REST API로 카메라 상태 조회
+@bp.route('/camera/api/status')
+def get_camera_status():
+    status = {}
+    for cam_id in range(max_cameras):
+        stream = streams.get(cam_id)
+        status[str(cam_id)] = stream.is_connected() if stream else False
+    return jsonify(status)

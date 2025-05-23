@@ -32,20 +32,23 @@
                 <span class="status-indicator status-active"></span>
                 <span class="text-sm text-gray-600">시스템 활성화</span>
               </div>
-              <div class="flex items-center space-x-2 ml-8">
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">1번 카메라 연결됨</span>
-                </div>
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">2번 카메라 연결됨</span>
-                </div>
-                <div class="flex items-center ml-4">
-                  <span class="status-indicator status-active"></span>
-                  <span class="text-sm text-gray-600">3번 카메라 연결됨</span>
-                </div>
-              </div>
+
+      <div id="camera-status-container" class="flex items-center space-x-4">
+        <div id="camera-status-0" class="flex items-center">
+          <span class="status-indicator" id="indicator-camera-0"></span>
+          <span class="text-sm text-gray-600">1번 카메라</span>
+        </div>
+        <div id="camera-status-1" class="flex items-center">
+          <span class="status-indicator" id="indicator-camera-1"></span>
+          <span class="text-sm text-gray-600">2번 카메라</span>
+        </div>
+        <div id="camera-status-2" class="flex items-center">
+          <span class="status-indicator" id="indicator-camera-2"></span>
+          <span class="text-sm text-gray-600">3번 카메라</span>
+        </div>
+      </div>
+
+
             </div>
           </div>
           <div class="flex items-center space-x-6">
@@ -77,18 +80,16 @@
                 실시간 불량 검출
               </h2>
             </div>
-            <div class="flex items-center space-x-3">
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-600">카메라:</span>
+            <div class="flex items-center space-x-4">
                 <select
                   class="bg-gray-100 border-none rounded px-3 py-1 text-sm text-gray-700 pr-8"
+                  style="width:180px"
                   id="cameraSelect"
                 >
-                  <option value="0">카메라 1 (메인)</option>
+                  <option value="0">카메라 1 (정면)</option>
                   <option value="1">카메라 2 (측면)</option>
                   <option value="2">카메라 3 (후면)</option>
                 </select>
-              </div>
             </div>
           </div>
           <div class="relative flex-1 bg-black rounded-lg overflow-hidden">

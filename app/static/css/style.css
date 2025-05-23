@@ -228,6 +228,18 @@ input.register-input[readonly] {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
   }
 }
+@keyframes pulse-status-error {
+  /* 공통 스타일 (아마도 다른 기능 관련) */
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 38, 11, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(245, 38, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 38, 11, 0);
+  }
+}
 
 .status-warning {
   /* 공통 스타일 (아마도 다른 기능 관련) */
@@ -237,6 +249,8 @@ input.register-input[readonly] {
 .status-error {
   /* 공통 스타일 (아마도 다른 기능 관련) */
   background-color: #ef4444;
+  box-shadow: 0 0 0 rgba(245, 38, 11, 0.4);
+  animation: pulse-status-error 2s infinite;
 }
 
 .custom-switch {
