@@ -112,8 +112,8 @@ def generate_frames(camera_id):
 
             now = datetime.now()
             current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-            cv2.putText(img, current_time_str, (img.shape[1] - 630, img.shape[0] - 20),
-                        cv2.FONT_HERSHEY_DUPLEX, 0.7, (83, 115, 219), 2)
+            cv2.putText(img, current_time_str, (img.shape[1] - 630, img.shape[0] - 40),
+                        cv2.FONT_HERSHEY_DUPLEX, 0.7, (83, 100, 219), 2)
 
             for result in results:
                 for box in result.boxes:
