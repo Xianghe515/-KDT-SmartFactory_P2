@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // 입력 이벤트: 숫자만 허용, 길이 제한, 자동 포커스
+  // 숫자만 허용, 길이 제한, 자동 포커스
   function handleInput(idx) {
     const { el, len } = segments[idx];
     // 숫자 외 제거 및 최대 길이 제한

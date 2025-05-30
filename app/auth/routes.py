@@ -29,7 +29,7 @@ def format_verification_code_with_hyphens(code):
 
 def send_verification_email(email, verification_code):
     """이메일로 인증번호 발송"""
-    subject = "[YourAppName] 이메일 인증번호"
+    subject = "[SUNsor] 이메일 인증번호"
     formatted_code = format_verification_code_with_hyphens(verification_code)
     body = f"안녕하세요!\n\n귀하의 이메일 인증번호는 다음과 같습니다:\n\n{formatted_code}\n\n인증 페이지에 입력하여 이메일 주소를 확인해주세요."
 

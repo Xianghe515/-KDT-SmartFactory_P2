@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const password = passwordInput.value;
     const confirmPassword = confirmPasswordInput.value;
 
-    // 간단한 유효성 검사 예시
+    // 유효성 검사
     if (companyName.length < 2) {
       displayMessage("사업체명은 최소 2글자 이상이어야 합니다.");
       return;

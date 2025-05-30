@@ -35,8 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-
-// ✅ 전역 변수로 선언하여 재사용
 let socket;
 function initializeWebSocket() {
     // 소켓이 이미 연결되었는지 확인
@@ -52,7 +50,7 @@ function initializeWebSocket() {
             console.error('WebSocket 연결 오류:', error);
         });
 
-        // 새로운 로그 수신
+        // 실시간 로그 수신
         socket.on('new_log', function (data) {
             displayLog(data);
         });
@@ -62,12 +60,11 @@ function initializeWebSocket() {
             console.log('검출 민감도 수정:', data.value);
         });
 
-        // 카메라 상태 수신 핸들러 추가
+        // 카메라 상태 수신 핸들러
         socket.on('camera_status_update', function (cameraStatus) {
             console.log('카메라 상태 업데이트 수신 (WebSocket):', cameraStatus);
             updateCameraStatusUI(cameraStatus); // WebSocket으로 받은 상태 업데이트 적용
         });
-
     }
 
     // 기존 로그 로드
@@ -85,7 +82,6 @@ function updateSensitivity(value) {
     const floatVal = parseFloat(value) / 100;  // 0.0 ~ 1.0 범위로 변환
     socket.emit('sensitivity', { value: floatVal });
 
-    // 👇 HTML 조작은 별도로 이벤트 핸들러에 등록하세요 (초기화 시점에)
     document.getElementById('sensitivityValue').innerText = value + '%';
 }
 
@@ -157,7 +153,7 @@ function displayLog(log) {
     console.log("Annotation URL for this log:", log.annotationUrl);
     // ----------------------------------------------
 
-    // 로그 항목 내용 생성
+    // 로그 항목 내용 생성(이미지, 시간, 카메라, 신뢰도 등)
     logItem.innerHTML = `
         <div class="flex items-start">
             <div class="w-40 bg-gray-200 rounded overflow-hidden flex-shrink-0" onclick="openImageModal('${log.imageUrl || ''}')">
@@ -289,7 +285,7 @@ function updateCameraStatusUI(status) {
                 indicator.classList.add("status-error");
             }
         } else {
-            console.warn(`indicator-camera-${camId} 엘리먼트를 찾을 수 없습니다.`);
+            console.warn(`indicator-camera-${camId}를 찾을 수 없습니다.`);
         }
     });
 }

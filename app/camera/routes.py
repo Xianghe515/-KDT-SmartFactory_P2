@@ -38,7 +38,7 @@ except Exception as e:
 max_cameras = 3
 streams = {}
 
-# 카메라 감지 및 VideoStream 객체 생성 (감지 실패해도 자리 유지)
+# 카메라 감지 및 VideoStream 객체 생성
 for i in range(max_cameras):
     try:
         stream = VideoStream(i)
@@ -87,7 +87,7 @@ def generate_frames(camera_id):
     host = request.host.split(':')[0]
     detected_classes = set()
 
-    target_class_indices = [0, 1, 2, 3, 4]
+    target_class_indices = [0, 1, 3, 4]
     colors = np.random.uniform(0, 255, size=(len(model.names), 3))
 
     trigger_counter = 0
@@ -240,7 +240,7 @@ def capture_frame(camera_id):
     frame = latest_frames.get(camera_id)
     if frame is None:
         return jsonify({"success": False, "message": "No frame available"}), 404
-
+# 변수 설정 및 이미지 저장
     now = datetime.now()
     save_dir = "app/static/detected"
     original_dir = "app/static/original"
@@ -254,7 +254,7 @@ def capture_frame(camera_id):
     cv2.imwrite(original_path, frame)
     image_path_for_web = f"static/detected/{filename}"
 
-    # 로그 DB 저장
+# 로그 DB 저장
     log = DetectionLog(
         timestamp=now,
         camera_id=camera_id,
@@ -265,7 +265,7 @@ def capture_frame(camera_id):
     db.session.add(log)
     db.session.commit()
 
-    # WebSocket - 실시간 로그 출력
+# WebSocket - 실시간 로그 출력
     issue_type = Log_Utils.extract_issue_type(filename)
     severity, severity_color = Log_Utils.map_severity(issue_type)
     camera_name = filename.split('_')[0]
@@ -274,7 +274,7 @@ def capture_frame(camera_id):
     download_url = f'http://{host}:5000{download_path}'
     annotation_url = f'http://{host}:3000/?image_url={download_url}'
 
-    # WebSocket 브로드캐스트
+# WebSocket 브로드캐스트
     socketio.emit('new_log', {
         'filename': filename,
         'timestamp': created_time,
@@ -303,7 +303,7 @@ def capture_frame(camera_id):
         }
     })
     
-# REST API로 카메라 상태 조회
+# 카메라 상태 조회
 @bp.route('/camera/api/status')
 def get_camera_status():
     status = {}
